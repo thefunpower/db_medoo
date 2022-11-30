@@ -7,10 +7,8 @@
 /**
 *  对数据库操作的封装
 *  https://medoo.in/api/where 
-*/
-if(!function_exists('do_action')){
-    include __DIR__.'/action.php';
-}
+*/  
+include __DIR__.'/helper.php'; 
 /**
 复杂的查寻，(...  AND ...) OR (...  AND ...)
 "OR #1" => [
@@ -22,12 +20,10 @@ if(!function_exists('do_action')){
  */
 /**
 * 数据库对象
-* 建议使用 db()
+* 建议使用 medoo_db()
 */
-global $_db;
-global $_db_active;
-$_db_active  = 'default';
-global $_db_connects;
+global $_db,$_db_active,$_db_connects; 
+$_db_active  = 'default'; 
 /**
 * 数据参数用于分页后生成分页HTML代码
 */
@@ -35,11 +31,7 @@ global $_db_par;
 /**
 * 错误信息
 */
-global $_db_error;
-/**
- * 连接数据库
- */
-include __DIR__.'/db_connect.php';
+global $_db_error; 
 /**
  * 激活平台数据库连接，平台数据库不支持从库读
  */
@@ -143,7 +135,7 @@ function new_db($config = [],$name = '')
  *
  * @return object
  */
-function db()
+function medoo_db()
 {
     global $_db_connects,$_db_active; 
     return $_db_connects[$_db_active];
@@ -199,15 +191,15 @@ function db_pager($table, $join, $columns = null, $where = null)
         $flag    = false;
         $count   = db_pager_count() ?: db_get_count($table, $join, "$table.id", $where);
     }
-    $current_page  = $_REQUEST['page'];
+    $current_page  = isset($_REQUEST['page'])?$_REQUEST['page']:1;
     if (!$current_page) {
-        $current_page  = g('page');
+        $current_page  = $_REQUEST['page'];
     }
     if (!$current_page) {
         $current_page = 1;
     }
-    $p1 = (int)($_REQUEST['per_page'] ?: g('per_page'));
-    $p2 = (int)($_REQUEST['page_size'] ?: g('page_size'));
+    $p1 = isset($_REQUEST['per_page'])?(int)($_REQUEST['per_page']):"";
+    $p2 = isset($_REQUEST['page_size'])?(int)($_REQUEST['page_size']):"";
     if ($p1 >= 1) {
         $pre_page  = $p1;
     } else {
@@ -266,18 +258,18 @@ function db_pager_count($nums = null)
 function db_pager_html($arr = [])
 {
     global $_db_par;
-    if ($arr['count']) {
+    if (isset($arr['count'])) {
         $count  = $arr['count'];
     } else {
         $count = $_db_par['count'];
     }
-    $page_url = $arr['url'];
-    if ($arr['size']) {
+    $page_url = isset($arr['url'])?$arr['url']:'';
+    if (isset($arr['size'])) {
         $size  = $arr['size'];
     } else {
         $size = $_db_par['size'] ?: 20;
     }
-    $paginate = new \lib\Paginate($count, $size);
+    $paginate = new medoo_paginate($count, $size);
     if ($page_url) {
         $paginate->url = $page_url;
     }
@@ -333,7 +325,7 @@ function db_get($table, $join = null, $columns = null, $where = null)
         $columns = db_raw($columns);
     }
     try {
-        $all =  db()->select($table, $join, $columns, $where);
+        $all =  medoo_db()->select($table, $join, $columns, $where);
         if($all){
             foreach($all as &$v){
                 db_row_json_to_array($table,$v);
@@ -403,8 +395,8 @@ function db_insert($table, $data = [],$don_run_action = false)
                 $data[$k] = addslashes($v);  
             }          
         }  
-        $_db    = db()->insert($table, $data);
-        $id = db()->id();
+        $_db    = medoo_db()->insert($table, $data);
+        $id = medoo_db()->id();
         //写入数据后
         $action_data = [];
         $action_data['id'] = $id;
@@ -465,10 +457,10 @@ function db_update($table, $data = [], $where = [],$don_run_action = false)
                 $data[$k] = addslashes($v);  
             }          
         } 
-        $_db    = db()->update($table, $data, $where);
-        $error = db()->error;
+        $_db    = medoo_db()->update($table, $data, $where);
+        $error = medoo_db()->error;
         if ($error) {
-            write_log(['db_error' => $error, 'sql' => db()->last()]);
+            write_log(['db_error' => $error, 'sql' => medoo_db()->last()]);
             throw new Exception($error);
         }
         $count =  $_db->rowCount();
@@ -493,7 +485,7 @@ function db_update($table, $data = [], $where = [],$don_run_action = false)
 function db_action($call)
 {
     $result = "";
-    $_db     = db();
+    $_db     = medoo_db();
     $_db->action(function ($_db) use (&$result, $call) {
         $call();
     });
@@ -536,9 +528,9 @@ function db_query($sql, $raw = null)
         exit('从库禁止运行update操作');
     }
     if ($raw === null) {
-        return db()->query($sql);
+        return medoo_db()->query($sql);
     }
-    $q = db()->query($sql, $raw);
+    $q = medoo_db()->query($sql, $raw);
     if ($q) {
         $all =  $q->fetchAll(\PDO::FETCH_ASSOC) ?: [];
         //查寻数据
@@ -562,7 +554,7 @@ function db_query($sql, $raw = null)
  */
 function db_get_min($table, $join  = "*", $column = null, $where = null)
 {
-    return db()->min($table, $join, $column, $where);
+    return medoo_db()->min($table, $join, $column, $where);
 }
 
 /**
@@ -576,7 +568,7 @@ function db_get_min($table, $join  = "*", $column = null, $where = null)
  */
 function db_get_max($table, $join =  "*", $column = null, $where = null)
 {
-    return db()->max($table, $join, $column, $where);
+    return medoo_db()->max($table, $join, $column, $where);
 }
 
 /**
@@ -589,7 +581,7 @@ function db_get_max($table, $join =  "*", $column = null, $where = null)
  */
 function db_get_count($table, $join =  "*", $column = null, $where = null)
 {
-    return db()->count($table, $join, $column, $where);
+    return medoo_db()->count($table, $join, $column, $where);
 }
 
 /**
@@ -602,7 +594,7 @@ function db_get_count($table, $join =  "*", $column = null, $where = null)
  */
 function db_get_has($table, $join = null, $where = null)
 {
-    return db()->has($table, $join, $where);
+    return medoo_db()->has($table, $join, $where);
 }
 
 /**
@@ -616,7 +608,7 @@ function db_get_has($table, $join = null, $where = null)
  */
 function db_get_rand($table, $join = "*", $column = null, $where = null)
 {
-    return db()->rand($table, $join, $column, $where);
+    return medoo_db()->rand($table, $join, $column, $where);
 }
 
 /**
@@ -630,7 +622,7 @@ function db_get_rand($table, $join = "*", $column = null, $where = null)
  */
 function db_get_sum($table, $join = "*", $column = null, $where = null)
 {
-    return db()->sum($table, $join, $column, $where);
+    return medoo_db()->sum($table, $join, $column, $where);
 }
 
 /**
@@ -644,7 +636,7 @@ function db_get_sum($table, $join = "*", $column = null, $where = null)
  */
 function db_get_avg($table, $join = "*", $column = null, $where = null)
 {
-    return db()->avg($table, $join, $column, $where);
+    return medoo_db()->avg($table, $join, $column, $where);
 }
 
 /**
@@ -668,7 +660,7 @@ function db_del($table, $where)
     if(db_can_run_action()){
         do_action("db_insert.$table.del", $where);
     }
-    return db()->delete($table, $where);
+    return medoo_db()->delete($table, $where);
 }
 
 function db_delete($table, $where)
@@ -687,7 +679,7 @@ function db_delete($table, $where)
 function show_tables($table)
 {
     $sql = "SHOW TABLES LIKE '%$table%';";
-    $all = db()->query($sql);
+    $all = medoo_db()->query($sql);
     foreach ($all as $v) {
         foreach ($v as $v1) {
             $list[] = $v1;
@@ -701,7 +693,7 @@ function show_tables($table)
 function get_table_fields($table, $has_key  = true)
 {
     $sql   = "SHOW FULL FIELDS FROM `".$table."`";
-    $lists = db()->query($sql);
+    $lists = medoo_db()->query($sql);
     $arr   = [];
     foreach ($lists as $vo) {
         if ($has_key) {
@@ -742,7 +734,7 @@ function database_tables($name = null, $show_markdown = false)
     $all  = db_query($sql, []);
     foreach ($all as $k => $v) {
         $sql   = "SHOW FULL FIELDS FROM `" . $v['Name'] . "`";
-        $lists = db()->query($sql, []);
+        $lists = medoo_db()->query($sql, []);
         $all[$k]['FIELDS'] = $lists;
     }
     if (!$show_markdown) {
@@ -765,7 +757,7 @@ function database_tables($name = null, $show_markdown = false)
  */
 function get_table_field_json($table){
     static $table_fields;
-    if(!$table_fields[$table]){
+    if(!isset($table_fields[$table])){
       $all = get_table_fields($table); 
       $table_fields_row = [];
       foreach($all as $k=>$v){
@@ -782,7 +774,7 @@ function get_table_field_json($table){
  */
 function get_table_field_is_json($table,$field){
     $table_fields = get_table_field_json($table); 
-    if($table_fields[$field]){
+    if(isset($table_fields[$field])){
       return true;
     }else{
       return false;
