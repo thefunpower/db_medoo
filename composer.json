@@ -1,0 +1,21 @@
+{
+    "name": "thefunpower/db_medoo",
+    "type": "library",
+    "description": "db",
+    "keywords": ["php"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "ken.sun",
+            "email": "kungfutime@foxmail.com" 
+        }
+    ],
+    "require": { 
+        "catfan/medoo": "^2.1"
+    }, 
+    "autoload": { 
+        "files":[
+            "./db.php"
+        ]
+    }
+}
