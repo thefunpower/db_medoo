@@ -10,12 +10,11 @@
             "email": "kungfutime@foxmail.com" 
         }
     ],
-    "require": { 
-        "catfan/medoo": "^2.1"
+    "require": {  
     }, 
     "autoload": { 
         "files":[
-            "./db.php"
+            "./inc/db.php"
         ]
     }
 }
