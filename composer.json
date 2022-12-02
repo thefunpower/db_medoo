@@ -14,7 +14,7 @@
     }, 
     "autoload": { 
         "files":[
-            "./inc/db.php"
+            "./inc/db/function.php"
         ]
     }
 }
