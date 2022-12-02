@@ -803,7 +803,32 @@ function db_row_json_to_array($table_name,&$row_data = []){
 }
 
 
-
+/**
+ * 数组排序
+ * array_order_by($row,$order,SORT_DESC);
+ */
+if(!function_exists('array_order_by')){
+    function array_order_by()
+    {
+        $args = func_get_args();
+        $data = array_shift($args);
+        foreach ($args as $n => $field) {
+            if (is_string($field)) {
+                $tmp = array();
+                if (!$data) return;
+                foreach ($data as $key => $row)
+                    $tmp[$key] = $row[$field];
+                $args[$n] = $tmp;
+            }
+        }
+        $args[] = &$data;
+        if ($args) {
+            call_user_func_array('array_multisort', $args);
+            return array_pop($args);
+        }
+        return;
+    }
+}
 
 
 /**
