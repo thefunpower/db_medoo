@@ -12,9 +12,6 @@
     ],
     "require": {  
     }, 
-    "autoload": { 
-        "files":[
-            "./inc/db/function.php"
-        ]
+    "autoload": {  
     }
 }
