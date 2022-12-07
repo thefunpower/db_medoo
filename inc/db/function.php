@@ -1069,4 +1069,31 @@ class medoo_paginate
 }
 
 
- 
+/**
+* 返回两个日期之间
+* $date1 = '2022-11-01';
+* $date2 = '2022-12-14';
+* 字段是datetime类型
+*/
+function db_between_date($field,$date1,$date2){
+    $start_time = date("Y-m-d 00:00:01",strtotime($date1));
+    $end_time   = date("Y-m-d 23:59:59",strtotime($date2));
+    $where = [];
+    $where[$field.'[>=]'] = $start_time;
+    $where[$field.'[<]'] = $end_time;
+    return $where;
+}
+/**
+* 返回两个月份之间
+* $date1 = '2022-11';
+* $date2 = '2022-12';
+* 字段是datetime类型
+*/
+function db_between_month($field,$date1,$date2){
+    $start_time = date("Y-m-d 00:00:01",strtotime($date1."-01"));
+    $end_time   = date("Y-m-d 00:00:00",strtotime($date2."-01"." +1 month"));
+    $where = [];
+    $where[$field.'[>=]'] = $start_time;
+    $where[$field.'[<]'] = $end_time;
+    return $where;
+}
