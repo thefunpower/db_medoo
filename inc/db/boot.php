@@ -23,18 +23,7 @@ if($medoo_db_config['db_user'] && $medoo_db_config['db_pwd']){
         $_db_connects['default'] = $_db;
         $_db_active  = 'default';
     } catch (Exception $e) {
-        $err = $e->getMessage();
-        if(DEBUG){
-            pr($err);exit;
-        }
-        $error = lang('MySql Connect Failed');
-        echo "<div style='color:#fff;background:red;padding:10px;width:600px;margin:auto;'>".$error."</div>
-        <style>
-        html,body{
-            background:#eee;
-        }
-        </style>
-        ";exit;
+        $err = $e->getMessage();  
     }
 }
 

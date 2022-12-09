@@ -137,7 +137,12 @@ function new_db($config = [],$name = '')
 function medoo_db()
 {
     global $_db_connects,$_db_active; 
-    return $_db_connects[$_db_active];
+    $db_connect =  $_db_connects[$_db_active];
+    if(!$db_connect){
+        exit("Lost connect");
+    }else{
+        return $db_connect;
+    }
 }
 if(!function_exists('db')){
     function db(){
@@ -286,13 +291,9 @@ function db_pager_html($arr = [])
 * 添加错误信息
 */
 function db_add_error($str)
-{
-    if(DEBUG){
-        pr($str);exit;
-    }
+{ 
     global $_db_error;
-    write_log($str,'error');
-    $_db_error[] = $str;
+    $_db_error[] = $str; 
 }
 /**
 * 获取错误信息
@@ -462,8 +463,7 @@ function db_update($table, $data = [], $where = [],$don_run_action = false)
         } 
         $_db    = medoo_db()->update($table, $data, $where);
         $error = medoo_db()->error;
-        if ($error) {
-            write_log(['db_error' => $error, 'sql' => medoo_db()->last()]);
+        if ($error) { 
             throw new Exception($error);
         }
         $count =  $_db->rowCount();
