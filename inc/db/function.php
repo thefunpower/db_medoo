@@ -338,6 +338,7 @@ function db_get($table, $join = null, $columns = null, $where = null)
         //查寻数据 
         if(db_can_run_action()){ 
             foreach($all as &$v){
+                if($v && is_array($v))
                 do_action("db_get_one.$table", $v);    
             }
         }
@@ -516,6 +517,7 @@ function db_get_one($table, $join  = "*", $columns = null, $where = null)
         }        
         //查寻数据
         if(db_can_run_action()){
+            if($one && is_array($one))
             do_action("db_get_one.$table", $one);
         }
         return $one;
