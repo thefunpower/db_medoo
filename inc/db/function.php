@@ -7,8 +7,7 @@
 /**
 *  对数据库操作的封装
 *  https://medoo.in/api/where 
-*/  
-include __DIR__.'/helper.php'; 
+*/   
 /**
 复杂的查寻，(...  AND ...) OR (...  AND ...)
 "OR #1" => [
@@ -138,9 +137,18 @@ function new_db($config = [],$name = '')
 function medoo_db()
 {
     global $_db_connects,$_db_active; 
-    return $_db_connects[$_db_active];
+    $db_connect =  $_db_connects[$_db_active];
+    if(!$db_connect){
+        exit("Lost connect");
+    }else{
+        return $db_connect;
+    }
 }
-
+if(!function_exists('db')){
+    function db(){
+        return medoo_db();
+    }
+}
 /***
  * 分页查寻 
  JOIN
@@ -283,13 +291,9 @@ function db_pager_html($arr = [])
 * 添加错误信息
 */
 function db_add_error($str)
-{
-    if(DEBUG){
-        pr($str);exit;
-    }
+{ 
     global $_db_error;
-    write_log($str,'error');
-    $_db_error[] = $str;
+    $_db_error[] = $str; 
 }
 /**
 * 获取错误信息
@@ -334,6 +338,7 @@ function db_get($table, $join = null, $columns = null, $where = null)
         //查寻数据 
         if(db_can_run_action()){ 
             foreach($all as &$v){
+                if($v && is_array($v))
                 do_action("db_get_one.$table", $v);    
             }
         }
@@ -459,8 +464,7 @@ function db_update($table, $data = [], $where = [],$don_run_action = false)
         } 
         $_db    = medoo_db()->update($table, $data, $where);
         $error = medoo_db()->error;
-        if ($error) {
-            write_log(['db_error' => $error, 'sql' => medoo_db()->last()]);
+        if ($error) { 
             throw new Exception($error);
         }
         $count =  $_db->rowCount();
@@ -513,6 +517,7 @@ function db_get_one($table, $join  = "*", $columns = null, $where = null)
         }        
         //查寻数据
         if(db_can_run_action()){
+            if($one && is_array($one))
             do_action("db_get_one.$table", $one);
         }
         return $one;
@@ -581,7 +586,7 @@ function db_get_max($table, $join =  "*", $column = null, $where = null)
  */
 function db_get_count($table, $join =  "*", $column = null, $where = null)
 {
-    return medoo_db()->count($table, $join, $column, $where);
+    return medoo_db()->count($table, $join, $column, $where)?:0;
 }
 
 /**
@@ -622,7 +627,7 @@ function db_get_rand($table, $join = "*", $column = null, $where = null)
  */
 function db_get_sum($table, $join = "*", $column = null, $where = null)
 {
-    return medoo_db()->sum($table, $join, $column, $where);
+    return medoo_db()->sum($table, $join, $column, $where)?:0;
 }
 
 /**
@@ -787,13 +792,310 @@ function get_table_field_is_json($table,$field){
 * @param $row_data 一行记录
 */
 function db_row_json_to_array($table_name,&$row_data = []){
-    foreach ($row_data as $key=>$val) {
-        if(is_string($val) && get_table_field_is_json($table_name,$key)){  
-          $row_data[$key] = json_decode($val,true)?:[];   
-        }
-        if(is_string($val) && is_json($val)){
-          $row_data[$key] = json_decode($val,true);
-        }
+    if(is_array($row_data)){
+        foreach ($row_data as $key=>$val) {
+            if(is_string($val) && get_table_field_is_json($table_name,$key)){  
+              $row_data[$key] = json_decode($val,true)?:[];   
+            }
+            if(is_string($val) && is_json($val)){
+              $row_data[$key] = json_decode($val,true);
+            }
+        } 
     } 
 }
 
+
+/**
+ * 数组排序
+ * array_order_by($row,$order,SORT_DESC);
+ */
+if(!function_exists('array_order_by')){
+    function array_order_by()
+    {
+        $args = func_get_args();
+        $data = array_shift($args);
+        foreach ($args as $n => $field) {
+            if (is_string($field)) {
+                $tmp = array();
+                if (!$data) return;
+                foreach ($data as $key => $row)
+                    $tmp[$key] = $row[$field];
+                $args[$n] = $tmp;
+            }
+        }
+        $args[] = &$data;
+        if ($args) {
+            call_user_func_array('array_multisort', $args);
+            return array_pop($args);
+        }
+        return;
+    }
+}
+
+
+/**
+ * 判断是否为json 
+ */
+if(!function_exists('is_json')){
+    function is_json($data, $assoc = false)
+    { 
+        $data = json_decode($data, $assoc);
+        if ($data && (is_object($data)) || (is_array($data) && !empty(current($data)))) {
+            return $data;
+        }
+        return false;
+    }
+}
+
+
+/**
+ * 添加动作
+ * @param string $name 动作名
+ * @param couser $call function
+ * @version 1.0.0
+ * @author sun <sunkangchina@163.com>
+ * @return mixed
+ */
+if(!function_exists("add_action")){
+    function add_action($name, $call,$level = 20)
+    {
+        global $_app;
+        if (strpos($name, '|') !== false) {
+            $arr = explode('|', $name);
+            foreach ($arr as $v) {
+                add_action($v, $call,$level);
+            }
+            return;
+        }
+        $_app['actions'][$name][] = ['func'=>$call,'level'=>$level];  
+    }
+}
+
+/**
+ * 执行动作
+ * @param  string $name 动作名
+ * @param  array &$par  参数
+ * @version 1.0.0
+ * @author sun <sunkangchina@163.com>
+ * @return  mixed
+ */
+if(!function_exists('do_action')){
+    function do_action($name, &$par = null)
+    {
+        global $_app;
+        if (!is_array($_app)) {
+            return;
+        }
+        $calls  = $_app['actions'][$name]; 
+        $calls  = array_order_by($calls,'level',SORT_DESC);  
+        if ($calls) {
+            foreach ($calls as $v) {
+                $func = $v['func'];
+                $func($par);
+            }
+        }
+    }
+}
+
+
+
+
+/**
+ *  分页 
+ *  类似淘宝分页
+ *  　　 
+ * @since 2014-2015
+ */
+/**
+ *<code>
+ *类似淘宝分页 
+ *  
+ *   
+ *$paginate = new medoo_paginate($row->num,1); 
+ *$paginate->url = $this->url;
+ *$limit = $paginate->limit;
+ *$offset = $paginate->offset;
+ *  
+ *$paginate = $paginate->show(); 
+ * 
+ * 
+.pagination li{
+    list-style: none;
+    float: left;
+    display: inline-block;
+    border: 1px solid #ff523b;
+    margin-left: 10px;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+    cursor: pointer;
+}
+.pagination .active{
+   background: #eee; 
+   border: 1px solid #000;
+}
+
+ *</code>   
+ *
+ */
+ 
+
+class medoo_paginate
+{
+    public $page;
+    public $pages;
+    public $url;
+    public $size;
+    public $count;
+    public $limit;
+    public $offset;
+    public $get = [];
+    static $class;
+    public $query = 'page';
+    /**
+     * 构造函数  
+     */
+    public function __construct($count, $size = 10)
+    {
+        $this->count = $count;
+        $this->size = $size;
+        //总页数
+        $this->pages = ceil($this->count / $this->size);
+        //当前页面
+        $this->page = isset($_GET[$this->query])?(int)$_GET[$this->query]:'';
+        if ($this->pages < 1) return;
+        if ($this->page <= 1)
+            $this->page = 1;
+        if ($this->page >= $this->pages)
+            $this->page = $this->pages;
+
+        $this->offset = $this->size * ($this->page - 1);
+        $this->limit = $this->size;
+    }
+    /**
+     * 生成URL函数，如有需要，可自行改写
+     * 调用函数 ($url,$par);
+     * @param string $url 　 
+     * @param string $par 　 
+     * @return  string
+     */
+    public function url($url, $par = [])
+    {
+        $url = $url . '?' . http_build_query($par);
+        return $url;
+    }
+    public function next($class = 'pagination')
+    {
+        $next = $this->page + 1;
+        $p = $_GET;
+        $p[$this->query] = $next;
+        if ($next <= $this->pages) {
+            return '<a rel="' . $next . '" class="' . $class . '" href="' . $this->url($this->url, $p) . '">下一页</a>';
+        }
+        return;
+    }
+
+    /**
+     * 显示分页 pagination
+     * @param string $class 　 
+     * @return  string
+     */
+    public function show($class = 'pagination')
+    {
+        if (static::$class) $class = static::$class;
+        $str = '<ul class="' . $class . '">';
+        $pre = $this->page - 1;
+        $p = $_GET;
+        $p[$this->query] = $pre > 0 ? $pre : 1;
+        if ($pre > 0)
+            $str .= '<li><a href="' . $this->url($this->url, $p) . '">&laquo;</a></li>';
+        if ($this->pages < 2) return;
+        $pages[1] = 1;
+        $pages[2] = 2;
+        $i = $this->page - 2 <= 1 ? 1 : $this->page - 2;
+        $e = $this->page + 2 >= $this->pages ? $this->pages : $this->page + 2;
+        if ($e < 5 && $this->pages >= 5)
+            $e = 5;
+        $pages['s'] = null;
+        if ($i > 0) {
+            for ($i; $i < $e + 1; $i++) {
+                $pages[$i] = $i;
+            }
+        }
+        $j = 0;
+        foreach ($pages as $k => $v) {
+            if ($j == 3) $n = $k;
+            $j++;
+        }
+
+        if ($this->pages > 5) {
+            if ($n != 3)
+                $pages['s'] = "...";
+            if ($e < $this->pages)
+                $pages['e'] = "...";
+        }
+        $p = $_GET;
+        if ($this->get) {
+            foreach ($this->get as $d) {
+                unset($p[$d]);
+            }
+        }
+
+        foreach ($pages as $j) {
+            $active = null;
+            if ($j == $this->page)
+                $active = "class='active'";
+            if (!$j) continue;
+            $p[$this->query] = $j;
+            if ($j == '...')
+                $str .= "<li $active><a href='javascript:void(0);' class='no'>$j</a></li>";
+            else
+                $str .= "<li $active><a href='" . $this->url($this->url, $p) . "'>$j</a></li>";
+        }
+
+        if ($this->page + 3 < $this->pages && $this->pages > 6) {
+            $str .= "<li><a href='" . $this->url($this->url, [$this->query => $this->pages - 1] + $p) . "'>" . ($this->pages - 1) . "</a></li>";
+        }
+        if ($this->page + 2 < $this->pages && $this->pages > 6) {
+            $str .= "<li><a href='" . $this->url($this->url, [$this->query => $this->pages] + $p) . "'>$this->pages</a></li>";
+        }
+        $p[$this->query] = $next = $this->page + 1;
+        if ($next <= $this->pages)
+            $str .= '<li><a href="' . $this->url($this->url, $p) . '">&raquo;</a></li>';
+
+
+        $str .= "</ul>";
+        return $str;
+    }
+}
+
+
+/**
+* 返回两个日期之间
+* $date1 = '2022-11-01';
+* $date2 = '2022-12-14';
+* 字段是datetime类型
+*/
+function db_between_date($field,$date1,$date2){
+    $start_time = date("Y-m-d 00:00:01",strtotime($date1));
+    $end_time   = date("Y-m-d 23:59:59",strtotime($date2));
+    $where = [];
+    $where[$field.'[>=]'] = $start_time;
+    $where[$field.'[<]'] = $end_time;
+    return $where;
+}
+/**
+* 返回两个月份之间
+* $date1 = '2022-11';
+* $date2 = '2022-12';
+* 字段是datetime类型
+*/
+function db_between_month($field,$date1,$date2){
+    $start_time = date("Y-m-d 00:00:01",strtotime($date1."-01"));
+    $end_time   = date("Y-m-d 00:00:00",strtotime($date2."-01"." +1 month"));
+    $where = [];
+    $where[$field.'[>=]'] = $start_time;
+    $where[$field.'[<]'] = $end_time;
+    return $where;
+}
