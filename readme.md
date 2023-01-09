@@ -3,6 +3,8 @@
 https://github.com/catfan/Medoo
 
 
-## license is under MIT
+## License
 
-see LICENSE
+The [MIT](LICENSE) License (MIT)
+
+
