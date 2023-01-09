@@ -327,25 +327,25 @@ function db_get($table, $join = null, $columns = null, $where = null)
     }
     if (is_string($columns) && strpos($columns, 'WHERE') !== FALSE) {
         $columns = db_raw($columns);
-    }
-    try {
-        $all =  medoo_db()->select($table, $join, $columns, $where);
-        if($all){
-            foreach($all as &$v){
-                db_row_json_to_array($table,$v);
-            }
-        } 
-        //查寻数据 
-        if(db_can_run_action()){ 
-            foreach($all as &$v){
-                if($v && is_array($v))
-                do_action("db_get_one.$table", $v);    
-            }
+    } 
+    $all =  medoo_db()->select($table, $join, $columns, $where);
+    if($all){
+        foreach($all as &$v){
+            db_row_json_to_array($table,$v);
         }
-        return $all;
-    } catch (Exception $e) {
-        db_add_error($e->getMessage());
+    } 
+    //查寻数据 
+    if(db_can_run_action()){ 
+        foreach($all as &$v){
+            if($v && is_array($v))
+            do_action("db_get_one.$table", $v);    
+        }
+    } 
+    if(medoo_db()->error){
+        db_add_error(medoo_db()->errorInfo[2]); 
     }
+    return $all; 
+    
 }
 /** 
 $lists = db_select('do_order', [ 
@@ -373,47 +373,46 @@ function db_insert($table, $data = [],$don_run_action = false)
         if (substr($k, 0, 1) == "_") {
             unset($data[$k]);
         }
+    } 
+    //写入数据前 
+    if(db_can_run_action() && !$don_run_action){
+        do_action("db_insert.$table.before", $data);
+        do_action("db_save.$table.before", $data);
     }
-    try {
-        //写入数据前 
-        if(db_can_run_action() && !$don_run_action){
-            do_action("db_insert.$table.before", $data);
-            do_action("db_save.$table.before", $data);
-        }
-        foreach($data as $k=>$v){ 
-            if(get_table_field_is_json($table,$k)){
-                if($v && !is_array($v)){
-                    $arr = json_decode($v,true);
-                    if($arr){
-                        $v = $arr;
-                    }else{
-                        $v = yaml($v);
-                    } 
-                }
-                if(!$v){
-                    $v = [];
-                }
+    foreach($data as $k=>$v){ 
+        if(get_table_field_is_json($table,$k)){
+            if($v && !is_array($v)){
+                $arr = json_decode($v,true);
+                if($arr){
+                    $v = $arr;
+                }else{
+                    $v = yaml($v);
+                } 
             }
-            if(is_array($v)){
-                $data[$k] = json_encode($v,JSON_UNESCAPED_UNICODE);   
-            }else{
-                $data[$k] = addslashes($v);  
-            }          
-        }  
-        $_db    = medoo_db()->insert($table, $data);
-        $id = medoo_db()->id();
-        //写入数据后
-        $action_data = [];
-        $action_data['id'] = $id;
-        $action_data['data'] = $data;
-        if(db_can_run_action() && !$don_run_action){
-            do_action("db_insert.$table.after", $action_data);
-            do_action("db_save.$table.after", $data);
+            if(!$v){
+                $v = [];
+            }
         }
-        return $id;
-    } catch (Exception $e) {
-        db_add_error($e->getMessage());
+        if(is_array($v)){
+            $data[$k] = json_encode($v,JSON_UNESCAPED_UNICODE);   
+        }else{
+            $data[$k] = addslashes($v);  
+        }          
+    }  
+    $_db    = medoo_db()->insert($table, $data);
+    $id = medoo_db()->id();
+    //写入数据后
+    $action_data = [];
+    $action_data['id'] = $id;
+    $action_data['data'] = $data;
+    if(db_can_run_action() && !$don_run_action){
+        do_action("db_insert.$table.after", $action_data);
+        do_action("db_save.$table.after", $data);
     }
+    if(medoo_db()->error){
+        db_add_error(medoo_db()->errorInfo[2]); 
+    }
+    return $id; 
 }
 
 /**
@@ -435,51 +434,51 @@ function db_update($table, $data = [], $where = [],$don_run_action = false)
         if (substr($k, 0, 1) == "_") {
             unset($data[$k]);
         }
+    } 
+    //更新数据前 
+    if(db_can_run_action() && !$don_run_action){
+        do_action("db_update.$table.before", $data);
+        do_action("db_save.$table.before", $data);
     }
-    try {
-        //更新数据前 
-        if(db_can_run_action() && !$don_run_action){
-            do_action("db_update.$table.before", $data);
-            do_action("db_save.$table.before", $data);
-        }
-        foreach($data as $k=>$v){
-            if(get_table_field_is_json($table,$k)){
-                if($v && !is_array($v)){
-                    $arr = json_decode($v,true);
-                    if($arr){
-                        $v = $arr;
-                    }else{
-                        $v = yaml($v);
-                    } 
-                }
-                if(!$v){
-                    $v = [];
-                }
+    foreach($data as $k=>$v){
+        if(get_table_field_is_json($table,$k)){
+            if($v && !is_array($v)){
+                $arr = json_decode($v,true);
+                if($arr){
+                    $v = $arr;
+                }else{
+                    $v = yaml($v);
+                } 
             }
-            if(is_array($v)){
-                $data[$k] = json_encode($v,JSON_UNESCAPED_UNICODE);   
-            }else{
-                $data[$k] = addslashes($v);  
-            }          
-        } 
-        $_db    = medoo_db()->update($table, $data, $where);
-        $error = medoo_db()->error;
-        if ($error) { 
-            throw new Exception($error);
+            if(!$v){
+                $v = [];
+            }
         }
-        $count =  $_db->rowCount();
-        //更新数据后
-        $action_data = [];
-        $action_data['where'] = $where;
-        $action_data['data'] = $data;
-        if(db_can_run_action() && !$don_run_action ){
-            do_action("db_update.$table.after", $action_data);
-            do_action("db_save.$table.after", $action_data);
-        }
-        return $count;
-    } catch (Exception $e) {
-        db_add_error($e->getMessage());
+        if(is_array($v)){
+            $data[$k] = json_encode($v,JSON_UNESCAPED_UNICODE);   
+        }else{
+            $data[$k] = addslashes($v);  
+        }          
+    } 
+    $_db    = medoo_db()->update($table, $data, $where);
+    $error = medoo_db()->error;
+    if ($error) { 
+        throw new Exception($error);
     }
+    $count =  $_db->rowCount();
+    //更新数据后
+    $action_data = [];
+    $action_data['where'] = $where;
+    $action_data['data'] = $data;
+    if(db_can_run_action() && !$don_run_action ){
+        do_action("db_update.$table.after", $action_data);
+        do_action("db_save.$table.after", $action_data);
+    }
+    if(medoo_db()->error){
+        db_add_error(medoo_db()->errorInfo[2]); 
+    }
+    return $count;
+     
 }
 
 /**
