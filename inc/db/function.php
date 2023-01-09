@@ -586,7 +586,7 @@ function db_get_max($table, $join =  "*", $column = null, $where = null)
  */
 function db_get_count($table, $join =  "*", $column = null, $where = null)
 {
-    return medoo_db()->count($table, $join, $column, $where);
+    return medoo_db()->count($table, $join, $column, $where)?:0;
 }
 
 /**
@@ -627,7 +627,7 @@ function db_get_rand($table, $join = "*", $column = null, $where = null)
  */
 function db_get_sum($table, $join = "*", $column = null, $where = null)
 {
-    return medoo_db()->sum($table, $join, $column, $where);
+    return medoo_db()->sum($table, $join, $column, $where)?:0;
 }
 
 /**
