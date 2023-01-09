@@ -293,6 +293,9 @@ function db_pager_html($arr = [])
 function db_add_error($str)
 { 
     global $_db_error;
+    if(function_exists('write_log_error')){ 
+        write_log_error($str);
+    }
     $_db_error[] = $str; 
 }
 /**
