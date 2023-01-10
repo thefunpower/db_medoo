@@ -200,28 +200,27 @@ function db_pager($table, $join, $columns = null, $where = null)
         $count   = db_pager_count() ?: db_get_count($table, $join, "$table.id", $where);
     }
     $current_page  = (int)(g('page')?:1);
-    $pre_page      = (int)(g('per_page')?:20); 
+    $per_page      = (int)(g('per_page')?:20); 
     $count         = (int)$count;
-    $last_page     = ceil($count / $pre_page);
+    $last_page     = ceil($count / $per_page);
     $has_next_page = $last_page > $current_page ? true : false;
-    $start         = ($current_page - 1) * $pre_page;
+    $start         = ($current_page - 1) * $per_page;
     if (is_object($where)) {
-        $where->value =  $where->value . " LIMIT $start, $pre_page";
+        $where->value =  $where->value . " LIMIT $start, $per_page";
     } else {
-        $where['LIMIT'] = [$start, $pre_page];
+        $where['LIMIT'] = [$start, $per_page];
     } 
     if ($flag) {
         $data  =  db_get($table, $columns, $where);
     } else {
         $data  =  db_get($table, $join, $columns, $where);
     }
-    $_db_par['size'] = $pre_page;
+    $_db_par['size'] = $per_page;
     $_db_par['count'] = $count;
     return [
         'current_page' => $current_page,
         'last_page'    => $last_page,
-        'pre_page'     => $pre_page,
-        'per_page'     => $per_page,  
+        'per_page'     => $per_page, 
         'total'        => $count,
         'has_next_page' => $has_next_page,
         'data'         => $data,
