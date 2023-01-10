@@ -199,24 +199,9 @@ function db_pager($table, $join, $columns = null, $where = null)
         $flag    = false;
         $count   = db_pager_count() ?: db_get_count($table, $join, "$table.id", $where);
     }
-    $current_page  = isset($_REQUEST['page'])?$_REQUEST['page']:1;
-    if (!$current_page) {
-        $current_page  = $_REQUEST['page'];
-    }
-    if (!$current_page) {
-        $current_page = 1;
-    }
-    $p1 = isset($_REQUEST['per_page'])?(int)($_REQUEST['per_page']):"";
-    $p2 = isset($_REQUEST['page_size'])?(int)($_REQUEST['page_size']):"";
-    if ($p1 >= 1) {
-        $pre_page  = $p1;
-    } else {
-        $pre_page  = $p2;
-    }
-    if (!$pre_page) {
-        $pre_page = 20;
-    }
-    $count = (int)$count;
+    $current_page  = (int)(g('page')?:1);
+    $pre_page      = (int)(g('per_page')?:20); 
+    $count         = (int)$count;
     $last_page     = ceil($count / $pre_page);
     $has_next_page = $last_page > $current_page ? true : false;
     $start         = ($current_page - 1) * $pre_page;
@@ -224,8 +209,7 @@ function db_pager($table, $join, $columns = null, $where = null)
         $where->value =  $where->value . " LIMIT $start, $pre_page";
     } else {
         $where['LIMIT'] = [$start, $pre_page];
-    }
-
+    } 
     if ($flag) {
         $data  =  db_get($table, $columns, $where);
     } else {
