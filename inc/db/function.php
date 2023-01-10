@@ -221,6 +221,7 @@ function db_pager($table, $join, $columns = null, $where = null)
         'current_page' => $current_page,
         'last_page'    => $last_page,
         'pre_page'     => $pre_page,
+        'per_page'     => $per_page,  
         'total'        => $count,
         'has_next_page' => $has_next_page,
         'data'         => $data,
