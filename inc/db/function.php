@@ -394,7 +394,7 @@ function db_insert($table, $data = [],$don_run_action = false)
     $action_data['data'] = $data;
     if(db_can_run_action() && !$don_run_action){
         do_action("db_insert.$table.after", $action_data);
-        do_action("db_save.$table.after", $data);
+        do_action("db_save.$table.after", $action_data);
     }
     if(medoo_db()->error){
         db_add_error(medoo_db()->errorInfo[2]); 
