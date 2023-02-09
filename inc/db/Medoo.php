@@ -1027,7 +1027,11 @@ class Medoo
     protected function whereClause($where, array &$map): string
     {
         $clause = '';
-
+        $lock = '';
+        if(isset($where['FOR UPDATE'])){
+            $lock = " FOR UPDATE";
+            unset($where['FOR UPDATE']);
+        }
         if (is_array($where)) {
             $conditions = array_diff_key($where, array_flip(
                 ['GROUP', 'ORDER', 'HAVING', 'LIMIT', 'LIKE', 'MATCH']
@@ -1154,7 +1158,7 @@ class Medoo
         } elseif ($raw = $this->buildRaw($where, $map)) {
             $clause .= ' ' . $raw;
         }
-
+        $clause .=  $lock;
         return $clause;
     }
 

@@ -443,7 +443,7 @@ function db_update($table, $data = [], $where = [],$don_run_action = false)
         }
         if(is_array($v)){
             $data[$k] = json_encode($v,JSON_UNESCAPED_UNICODE);   
-        }else{
+        }else if(is_string($v)){ 
             $data[$k] = addslashes($v);  
         }          
     } 
@@ -474,11 +474,26 @@ function db_update($table, $data = [], $where = [],$don_run_action = false)
  */
 function db_action($call)
 {
+    global $is_db_action;
+    $is_db_action = true;
     $result = "";
     $_db     = medoo_db();
-    $_db->action(function ($_db) use (&$result, $call) {
+    $_db->action(function ($_db) use (&$result, $call) { 
         $call();
     });
+}
+/**
+* 对数据进行
+*/
+function db_for_update($table,$id){
+    global $is_db_action;
+    if(!$is_db_action){
+        exit('query error:<br> db_action(function(){<br> db_for_update($table,$id);<br>});');
+    }
+    return db_get($table,"*",[
+        'id'=>$id,
+        'FOR UPDATE'=>TRUE,
+    ]);  
 }
 /**
  * 根据表名、字段 、条件 查寻一条记录
