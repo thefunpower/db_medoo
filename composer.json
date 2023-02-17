@@ -1,7 +1,7 @@
 {
     "name": "thefunpower/db_medoo",
     "type": "library",
-    "description": "db",
+    "description": "数据库封装，基于medoo 2.1.8",
     "keywords": ["php"],
     "license": "MIT",
     "authors": [
