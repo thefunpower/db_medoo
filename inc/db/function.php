@@ -792,17 +792,19 @@ function get_table_field_is_json($table,$field){
 * @param $table_name 表名
 * @param $row_data 一行记录
 */
-function db_row_json_to_array($table_name,&$row_data = []){
+function db_row_json_to_array($table_name,&$row_data = []){ 
     if(is_array($row_data)){
         foreach ($row_data as $key=>$val) {
             if(is_string($val) && get_table_field_is_json($table_name,$key)){  
-              $row_data[$key] = json_decode($val,true)?:[];   
+                $row_data[$key] = json_decode($val,true)?:[];   
             }
-            if(is_string($val) && is_json($val)){
-              $row_data[$key] = json_decode($val,true);
+            else if(is_string($val) && is_json($val)){
+                $row_data[$key] = json_decode($val,true);
+            }else if(is_string($val)){
+                $row_data[$key] = stripslashes($val);
             }
         } 
-    } 
+    }
 }
 
 
