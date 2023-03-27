@@ -455,8 +455,9 @@ function db_update($table, $data = [], $where = [],$don_run_action = false)
     $count =  $_db->rowCount();
     //更新数据后
     $action_data = [];
-    $action_data['where'] = $where;
-    $action_data['data'] = $data;
+    $action_data['where'] = $where; 
+    $action_data['id']    = $where['id']?:'';
+    $action_data['data']  = $data;
     if(db_can_run_action() && !$don_run_action ){
         do_action("db_update.$table.after", $action_data);
         do_action("db_save.$table.after", $action_data);
