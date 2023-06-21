@@ -414,7 +414,7 @@ function db_insert($table, $data = [],$don_run_action = false)
 }
 
 /**
- * 写入记录
+ * 更新记录
  *
  * @param string $table 表名 
  * @param array  $data  数据 
