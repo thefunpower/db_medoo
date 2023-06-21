@@ -1,13 +1,13 @@
 {
     "name": "thefunpower/db_medoo",
     "type": "library",
-    "description": "数据库封装，基于medoo 2.1.8",
+    "description": "数据库封装，基于medoo 2.1.10",
     "keywords": ["php"],
     "license": "MIT",
     "authors": [
         {
             "name": "ken.sun",
-            "email": "sunkangchina@163.com" 
+            "email": "yiiphp@foxmail.com" 
         }
     ],
     "require": {  
