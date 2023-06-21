@@ -213,6 +213,13 @@ db_query($sql, $raw = null)
 do_action("db_query", $all) 
 ~~~
 
+其中`$sql`为`select * from table_name where user_id=:user_id`
+
+`$raw` 为 `[':user_id'=>1]`
+
+
+
+
 ## 事务
 
 需要`inner db`支持
