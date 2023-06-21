@@ -2,6 +2,9 @@
 
 对 `Medoo Version: 2.1.10` 再封装，让操作更简单。
 
+~~~
+composer require thefunpower/db_medoo
+~~~
 
 ## $where条件
 
