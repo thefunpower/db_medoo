@@ -305,6 +305,13 @@ function db_get_error()
  */
 function db_get($table, $join = null, $columns = null, $where = null)
 {
+    if(!$columns || is_numeric($columns)){
+        $columns = $join;
+        $join = '*';
+        if(is_numeric($columns)){
+            $where['LIMIT'] = $columns;
+        }
+    }
     if (is_array($join)) {
         foreach ($join as $k => $v) {
             if (is_string($v) && strpos($v, '(') !== false) {
