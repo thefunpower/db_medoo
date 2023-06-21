@@ -188,6 +188,10 @@ $data = db_pager("do_order",
  */ 
 function db_pager($table, $join, $columns = null, $where = null)
 {
+    if(!$columns){
+        $columns = $join;
+        $join = '*'; 
+    } 
     global $_db_par;
     $flag = true;
     if (!$where) {
