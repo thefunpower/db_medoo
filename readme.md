@@ -269,6 +269,11 @@ $lists = db_get('do_order', [
 ], 
 ~~~
 
+## field 排序
+~~~
+'ORDER'=>['id'=>[1,2]]
+~~~
+
 ## 其他where条件请查看
 
 https://medoo.in/api/where
