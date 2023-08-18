@@ -43,6 +43,12 @@ $where['ORDER'] = ['id'=>'DESC'];
     "AND #3" => $or_where
     ]
 ];
+//(... OR  ...) AND (...  OR ...)
+"AND #1" => [
+    "OR #2" => $where,
+    "OR #3" => $or_where
+    ]
+];
 ~~~
 
 ## where字段两个日期之间
