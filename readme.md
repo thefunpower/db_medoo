@@ -35,6 +35,16 @@ $where['LIMIT'] = 10;
 $where['ORDER'] = ['id'=>'DESC']; 
 ~~~
 
+# OR
+~~~
+//(...  AND ...) OR (...  AND ...)
+"OR #1" => [
+    "AND #2" => $where,
+    "AND #3" => $or_where
+    ]
+];
+~~~
+
 ## where字段两个日期之间
 
 字段是datetime类型  
