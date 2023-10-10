@@ -198,10 +198,16 @@ function db_pager($table, $join, $columns = null, $where = null)
         $where   = $columns;
         $columns = $join ?: "*";
         $join    = '';
+        if($where && is_string($where)){
+            $where = [];
+        }
         $count   = db_pager_count() ?: db_get_count($table, $where);
     } else if ($join && $where) {
         $flag    = false;
         $count   = db_pager_count() ?: db_get_count($table, $join, "$table.id", $where);
+    }
+    if($where && is_string($where)){
+        $where = [];
     }
     $current_page  = (int)(g('page')?:1);
     $per_page      = (int)(g('per_page')?:20); 
