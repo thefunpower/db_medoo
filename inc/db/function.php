@@ -303,6 +303,22 @@ function db_get_error()
         return $_db_error;
 }
 
+function db_get_fast($table, $join = null, $columns = null, $where = null)
+{ 
+    if($join == '*'){
+        $join = "id";
+        $in = db_get($table, $join, $columns, $where); 
+        if($in){
+            $join = "*";
+            $where['id'] = $in; 
+            return db_get($table, $join, $where);
+        }else{
+            return;
+        }
+    }else{
+        return db_get($table, $join, $columns, $where);
+    }
+}
 /***
  * 根据表名、字段 、条件 查寻多条记录
  * where https://medoo.in/api/where
