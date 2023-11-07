@@ -290,6 +290,43 @@ $lists = db_get('do_order', [
 'ORDER'=>['id'=>[1,2]]
 ~~~
 
+## 跨库数据库事务
+调用方式
+~~~
+xa_db_action([
+  'a'=>function(){
+    echo "a<br>";
+    db_insert("config",['title'=>1]);
+  },
+  'b'=>function(){
+    echo "b<br>";
+    db_insert("config",['title'=>'b']);
+  }
+]);
+~~~
+
+其中 `a` `b`是数据库连接
+
+配置数据库
+
+~~~
+new_db([
+  'db_host'=>"127.0.0.1",
+  'db_name'=>"test1",
+  'db_user'=>"root",
+  'db_pwd'=>"111111",
+  'db_port'=>"3306",
+],'a');
+
+new_db([
+  'db_host'=>"127.0.0.1",
+  'db_name'=>"test2",
+  'db_user'=>"root",
+  'db_pwd'=>"111111",
+  'db_port'=>"3306",
+],'b'); 
+~~~
+
 ## 其他where条件请查看
 
 https://medoo.in/api/where
