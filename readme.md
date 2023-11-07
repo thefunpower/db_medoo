@@ -301,6 +301,8 @@ xa_db_action([
   'b'=>function(){
     echo "b<br>";
     db_insert("config",['title'=>'b']);
+    //抛出异常时也会回滚
+    //throw new Exception("错误");
   }
 ]);
 ~~~
