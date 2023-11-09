@@ -329,9 +329,13 @@ new_db([
 ],'b'); 
 ~~~
 
-## 其他where条件请查看
-
-https://medoo.in/api/where
+## 修改表名
+~~~ 
+add_action("db_table.a",function(&$table){
+    $table = 'a_100';
+});
+~~~
+ 
 
 
 ## License
