@@ -332,6 +332,7 @@ function db_get_fast($table, $join = null, $columns = null, $where = null)
  */
 function db_get($table, $join = null, $columns = null, $where = null)
 {
+    do_action("db_table.$table",$table);
     if(!$columns || is_numeric($columns)){
         $columns = $join;
         $join = '*';
@@ -390,6 +391,7 @@ function db_select($table, $join = "*", $columns = null, $where = null)
  */
 function db_insert($table, $data = [],$don_run_action = false)
 {
+    do_action("db_table.$table",$table);
     foreach ($data as $k => $v) {
         if (substr($k, 0, 1) == "_") {
             unset($data[$k]);
@@ -445,6 +447,7 @@ function db_insert($table, $data = [],$don_run_action = false)
  */
 function db_update($table, $data = [], $where = [],$don_run_action = false)
 {
+    do_action("db_table.$table",$table);
     if(!db_can_run_update()){
         exit('从库禁止运行update操作');
     }
@@ -595,6 +598,7 @@ function db_query($sql, $raw = null)
  */
 function db_get_min($table, $join  = "*", $column = null, $where = null)
 {
+    do_action("db_table.$table",$table);
     return medoo_db()->min($table, $join, $column, $where);
 }
 
@@ -609,6 +613,7 @@ function db_get_min($table, $join  = "*", $column = null, $where = null)
  */
 function db_get_max($table, $join =  "*", $column = null, $where = null)
 {
+    do_action("db_table.$table",$table);
     return medoo_db()->max($table, $join, $column, $where);
 }
 
@@ -622,6 +627,7 @@ function db_get_max($table, $join =  "*", $column = null, $where = null)
  */
 function db_get_count($table, $join =  "*", $column = null, $where = null)
 {
+    do_action("db_table.$table",$table);
     return medoo_db()->count($table, $join, $column, $where)?:0;
 }
 
@@ -635,6 +641,7 @@ function db_get_count($table, $join =  "*", $column = null, $where = null)
  */
 function db_get_has($table, $join = null, $where = null)
 {
+    do_action("db_table.$table",$table);
     return medoo_db()->has($table, $join, $where);
 }
 
@@ -649,6 +656,7 @@ function db_get_has($table, $join = null, $where = null)
  */
 function db_get_rand($table, $join = "*", $column = null, $where = null)
 {
+    do_action("db_table.$table",$table);
     return medoo_db()->rand($table, $join, $column, $where);
 }
 
@@ -663,6 +671,7 @@ function db_get_rand($table, $join = "*", $column = null, $where = null)
  */
 function db_get_sum($table, $join = "*", $column = null, $where = null)
 {
+    do_action("db_table.$table",$table);
     return medoo_db()->sum($table, $join, $column, $where)?:0;
 }
 
@@ -677,6 +686,7 @@ function db_get_sum($table, $join = "*", $column = null, $where = null)
  */
 function db_get_avg($table, $join = "*", $column = null, $where = null)
 {
+    do_action("db_table.$table",$table);
     return medoo_db()->avg($table, $join, $column, $where);
 }
 
@@ -697,6 +707,7 @@ function db_raw($raw)
 //删除
 function db_del($table, $where)
 {
+    do_action("db_table.$table",$table);
     //删除数据前
     if(db_can_run_action()){
         do_action("db_insert.$table.del", $where);
@@ -750,6 +761,7 @@ function get_table_fields($table, $has_key  = true)
  */ 
 function db_allow($table, $data)
 {
+    do_action("db_table.$table",$table);
     $fields = get_table_fields($table);
     foreach ($data as $k => $v) {
         if (!$fields[$k]) {
