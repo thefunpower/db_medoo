@@ -1203,18 +1203,27 @@ db_struct_table_range_auto('wordpress','my_table',[
 */
 function db_struct_table_range_auto($db_name,$table,$year_month = [],$datetime_field = 'created_at',$name='p'){
     $all = db_struct_show_range($db_name,$table);
+    sort($year_month); 
     if($all){
         $list = [];
+        $last = '';
         foreach($all as $v){
             $k = str_replace($name,'',$v); 
             $list[$k] = true;
-        }
+            $last = $k;
+        } 
         foreach($year_month as $k=>$v){
             $a = date("Ym",strtotime($v));
             if($list[$a]){
                 unset($year_month[$k]);
             }
-        } 
+            if($last >= $a){
+                unset($year_month[$k]);
+            }
+        }
+    }
+    if(!$year_month){
+        return false;
     }
     return db_struct_table_range($table,$year_month,$datetime_field,$name);
 }
