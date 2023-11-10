@@ -1249,7 +1249,7 @@ function db_struct_table_range($table,$year_month = [],$datetime_field = 'create
     if(strpos($table_info,'PARTITION') === false){
         $sql = " 
             ALTER TABLE `$table` 
-            PARTITION BY RANGE COLUMNS(created_at) (
+            PARTITION BY RANGE COLUMNS($datetime_field) (
               ".$next."
             );
         "; 
