@@ -336,7 +336,17 @@ add_action("db_table.a",function(&$table){
 });
 ~~~
  
+###  创建分区表,自动排除已有的
 
+~~~ 
+db_struct_table_range_auto('wordpress','my_table',[
+    '2023-11',
+    '2023-12',
+    '2024-01',
+    '2024-02',
+    '2024-03',
+]);
+~~~ 
 
 ## License
 
