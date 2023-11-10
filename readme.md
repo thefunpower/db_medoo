@@ -6,6 +6,46 @@
 composer require thefunpower/db_medoo
 ~~~
 
+配置
+
+~~~
+/**
+* 数据库连接
+*/
+$medoo_db_config['db_name'] = 'dentalbest_erp'; 
+$medoo_db_config['db_host'] = '127.0.0.1';
+$medoo_db_config['db_user'] = 'root';
+$medoo_db_config['db_pwd']  = '111111';
+$medoo_db_config['db_port'] = 3306; 
+
+
+include __DIR__.'/vendor/thefunpower/db_medoo/boot.php';
+
+~~~
+
+读库
+~~~
+// 从库读库 
+$medoo_db_config['read_db_host'] = '127.0.0.1';
+$medoo_db_config['read_db_name'] = ['read2','read1'];
+$medoo_db_config['read_db_user'] = 'root';
+$medoo_db_config['read_db_pwd'] = '111111';
+$medoo_db_config['read_db_port'] = 3306; 
+
+~~~
+
+在使用只读库时
+~~~
+db_active_read();
+~~~
+
+切回默认数据库
+~~~
+db_active_default();
+~~~
+
+
+
 ## $where条件
 
 ~~~
