@@ -1187,3 +1187,107 @@ function xa_db_action($key_call = []) {
   db_active('default');
   return $flag;
 }
+
+
+/**
+* 创建分区表,自动排除已有的
+
+db_struct_table_range_auto('wordpress','my_table',[
+    '2023-11',
+    '2023-12',
+    '2024-01',
+    '2024-02',
+    '2024-03',
+]);
+
+*/
+function db_struct_table_range_auto($db_name,$table,$year_month = [],$datetime_field = 'created_at',$name='p'){
+    $all = db_struct_show_range($db_name,$table);
+    if($all){
+        $list = [];
+        foreach($all as $v){
+            $k = str_replace($name,'',$v); 
+            $list[$k] = true;
+        }
+        foreach($year_month as $k=>$v){
+            $a = date("Ym",strtotime($v));
+            if($list[$a]){
+                unset($year_month[$k]);
+            }
+        } 
+    }
+    return db_struct_table_range($table,$year_month,$datetime_field,$name);
+}
+/**
+* 创建分区表，内部调用
+db_struct_table_range_auto('my_table',[
+    '2023-11',
+    '2023-12',
+    '2024-01',
+],'created_at');
+
+*/
+function db_struct_table_range($table,$year_month = [],$datetime_field = 'created_at',$name='p'){
+    $table = addslashes($table);
+    $next = '';
+    foreach($year_month as $v){
+        $a = date("Ym",strtotime($v));
+        $b = date("Y-m-01",strtotime("+1 month",strtotime($v)));
+        $next .= "PARTITION ".$name.$a." VALUES LESS THAN ('".$b."'),";
+    }
+    $next = substr($next,0,-1);
+    $table_info = db_show_create_table($table);
+    if(strpos($table_info,'PARTITION') === false){
+        $sql = " 
+            ALTER TABLE $table 
+            PARTITION BY RANGE COLUMNS(created_at) (
+              ".$next."
+            );
+        "; 
+    }else {
+        $sql = " 
+            ALTER TABLE $table 
+            ADD PARTITION (
+              ".$next."
+            );
+        "; 
+    }  
+    return db_query($sql);
+}
+/**
+* 分区表名称
+*/
+function db_struct_show_range($db_name = '',$table = ''){
+    $db_name = addslashes($db_name);
+    $table   = addslashes($table);
+    $sql = "SELECT * FROM information_schema.PARTITIONS WHERE TABLE_SCHEMA = '".$db_name."' AND TABLE_NAME = '".$table."'"; 
+    $res = db_query($sql,[]);
+    foreach($res as $v){
+        $p[] = $v['PARTITION_NAME'];
+    }
+    return $p;
+}  
+/**
+* 删除某个分区表
+* 删除后分区数据也会一起删除
+*/ 
+function drop_struct_range($table,$p){
+    $table = addslashes($table);
+    $p     = addslashes($p);
+    $sql = "ALTER TABLE $table DROP PARTITION ".$p;
+    return db_query($sql);
+}
+/**
+* 显示create table语句
+*/
+function db_show_create_table($table,$return_val = true){
+    $table = addslashes($table);
+    $sql = 'SHOW CREATE TABLE `'.$table.'` ';
+    $res = db_query($sql,[])[0];
+    $val = $res['Create Table'];
+    $list[$res['Table']] = $val;
+    if($return_val){
+        return $val;
+    }
+    return $list; 
+}
