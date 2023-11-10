@@ -1220,14 +1220,14 @@ function db_struct_table_range_auto($db_name,$table,$year_month = [],$datetime_f
 }
 /**
 * 创建分区表，内部调用
-db_struct_table_range_auto('my_table',[
+db_struct_table_range('my_table',[
     '2023-11',
     '2023-12',
     '2024-01',
-],'created_at');
+],'created_at','p',false);
 
 */
-function db_struct_table_range($table,$year_month = [],$datetime_field = 'created_at',$name='p'){
+function db_struct_table_range($table,$year_month = [],$datetime_field = 'created_at',$name='p',$return_sql = false){
     $table = addslashes($table);
     $next = '';
     foreach($year_month as $v){
@@ -1239,19 +1239,22 @@ function db_struct_table_range($table,$year_month = [],$datetime_field = 'create
     $table_info = db_show_create_table($table);
     if(strpos($table_info,'PARTITION') === false){
         $sql = " 
-            ALTER TABLE $table 
+            ALTER TABLE `$table` 
             PARTITION BY RANGE COLUMNS(created_at) (
               ".$next."
             );
         "; 
     }else {
         $sql = " 
-            ALTER TABLE $table 
+            ALTER TABLE `$table` 
             ADD PARTITION (
               ".$next."
             );
         "; 
     }  
+    if($return_sql){
+        return $sql;
+    }
     return db_query($sql);
 }
 /**
@@ -1274,7 +1277,7 @@ function db_struct_show_range($db_name = '',$table = ''){
 function drop_struct_range($table,$p){
     $table = addslashes($table);
     $p     = addslashes($p);
-    $sql = "ALTER TABLE $table DROP PARTITION ".$p;
+    $sql = "ALTER TABLE `$table` DROP PARTITION ".$p;
     return db_query($sql);
 }
 /**

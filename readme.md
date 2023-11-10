@@ -348,6 +348,16 @@ db_struct_table_range_auto('wordpress','my_table',[
 ]);
 ~~~ 
 
+返回创建分区SQL   
+
+~~~
+db_struct_table_range('my_table',[
+    '2023-11',
+    '2023-12',
+    '2024-01',
+],'created_at','p',true);
+~~~
+
 ## License
 
 The [MIT](LICENSE) License (MIT)
