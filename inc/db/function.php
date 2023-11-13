@@ -419,7 +419,7 @@ function db_insert($table, $data = [],$don_run_action = false)
         if(is_array($v)){
             $data[$k] = json_encode($v,JSON_UNESCAPED_UNICODE);   
         }else{
-            $data[$k] = addslashes($v);  
+            $data[$k] = $v;  
         }          
     }  
     $_db    = medoo_db()->insert($table, $data);
@@ -481,7 +481,7 @@ function db_update($table, $data = [], $where = [],$don_run_action = false)
         if(is_array($v)){
             $data[$k] = json_encode($v,JSON_UNESCAPED_UNICODE);   
         }else if(is_string($v)){ 
-            $data[$k] = addslashes($v);  
+            $data[$k] = $v;  
         }          
     } 
     $_db    = medoo_db()->update($table, $data, $where);
