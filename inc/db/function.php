@@ -1,9 +1,4 @@
 <?php
-
-/*
-    Copyright (c) 2021-2031, All rights reserved.
-    This is  a library, use is under MIT license.
-*/
 /**
 *  对数据库操作的封装
 *  https://medoo.in/api/where 
