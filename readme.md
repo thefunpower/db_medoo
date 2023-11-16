@@ -44,6 +44,16 @@ db_active_read();
 db_active_default();
 ~~~
 
+## 行锁
+需要放在事务中
+~~~
+db_for_update($table,$id);
+~~~
+
+## 加+
+~~~
+"age[+]" => 1
+~~~
 
 
 ## $where条件
