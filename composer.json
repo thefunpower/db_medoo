@@ -3,7 +3,7 @@
     "type": "library",
     "description": "数据库封装，基于medoo 2.1.10",
     "keywords": ["php"],
-    "license": "MIT",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "kenken"
