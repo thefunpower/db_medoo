@@ -410,6 +410,6 @@ db_struct_table_range('my_table',[
 
 ## License
 
-The [Apache-2.0](LICENSE) License (MIT)
+[Apache License 2.0](LICENSE)
 
 
