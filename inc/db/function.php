@@ -1147,25 +1147,38 @@ function db_between_month($field,$date1,$date2){
 
 /**
 * 跨库数据库事务
-*/
+*/ 
 function xa_db_action($key_call = []) {
   global $_db_connects;
   global $_db_thor_err;
   $_db_thor_err = true;
   $find_err = false;
   $commits = []; 
+  $active_dsn = [];
+  $only = [];
   foreach($key_call as $key=>$call) {
-      $pdo = $_db_connects[$key]->pdo; 
+      $medoo = $_db_connects[$key];
+      $dsn = $medoo->info()['dsn'];
+      if(!$active_dsn[$dsn]){
+        $active_dsn[$dsn] = $key;
+        $only[$key] = true;  
+      }
+      
+      $pdo = $medoo ->pdo; 
       if(!is_object($pdo)){
         throw new Exception("未知的数据库".$key);        
       }
-  }
+  } 
   try {
     foreach($key_call as $key=>$call) {
-      $pdo = $_db_connects[$key]->pdo;
-      $commits[] = $pdo;
-      $pdo->beginTransaction();
-      db_active($key);
+      $medoo = $_db_connects[$key];
+      $dsn = $medoo->info()['dsn'];
+      $pdo = $medoo ->pdo;  
+      if($only[$key]){
+        $commits[] = $pdo;
+        $pdo->beginTransaction();
+        db_active($key);
+      } 
       $call();
     } 
     foreach($commits as $pdo) {
