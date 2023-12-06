@@ -1162,8 +1162,7 @@ function xa_db_action($key_call = []) {
       if(!$active_dsn[$dsn]){
         $active_dsn[$dsn] = $key;
         $only[$key] = true;  
-      }
-      
+      } 
       $pdo = $medoo->pdo; 
       if(!is_object($pdo)){
         throw new Exception("未知的数据库".$key);        
