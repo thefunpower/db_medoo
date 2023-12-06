@@ -1164,7 +1164,7 @@ function xa_db_action($key_call = []) {
         $only[$key] = true;  
       }
       
-      $pdo = $medoo ->pdo; 
+      $pdo = $medoo->pdo; 
       if(!is_object($pdo)){
         throw new Exception("未知的数据库".$key);        
       }
