@@ -450,7 +450,7 @@ model事件
     /**
     * 更新数据后
     */
-    public function after_update($data,$where){
+    public function after_update($row_count,$data,$where){
     }
     /**
     * 删除前

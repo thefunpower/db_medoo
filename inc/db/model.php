@@ -33,7 +33,7 @@ class model{
 	/**
 	* 更新数据后
 	*/
-	public function after_update($data,$where){
+	public function after_update($row_count,$data,$where){
 	}
 	/**
 	* 删除前
@@ -57,9 +57,9 @@ class model{
 		$this->_where($where);
 		$this->before_update($data,$where);
 		$data_db = db_allow($this->table,$data);
-		db_update($this->table,$data_db,$where);
-		$this->after_update($data,$where);
-		return $id;
+		$row_count = db_update($this->table,$data_db,$where);
+		$this->after_update($row_count,$data,$where);
+		return $row_count;
 	}
 	/**
 	* 写入数据
