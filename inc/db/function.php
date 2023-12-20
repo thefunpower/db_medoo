@@ -707,7 +707,8 @@ function db_del($table, $where)
     if(db_can_run_action()){
         do_action("db_insert.$table.del", $where);
     }
-    return medoo_db()->delete($table, $where);
+    $data = medoo_db()->delete($table, $where);
+    return $data->rowCount();
 }
 
 function db_delete($table, $where)
