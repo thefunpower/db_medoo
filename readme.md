@@ -408,6 +408,64 @@ db_struct_table_range('my_table',[
 ],'created_at','p',true);
 ~~~
 
+## 使用model
+~~~
+class GoodsModel extends \model{ 
+    protected $table = 'wp_e_events';
+
+}
+~~~
+
+model事件
+
+
+~~~
+    /**
+    * 查寻前
+    */
+    public function before_find(&$where){
+    }
+    /**
+    * 查寻后
+    */
+    public function after_find(&$data){
+    }
+    
+    /**
+    * 写入数据前
+    */
+    public function before_insert(&$data){
+    }
+    /**
+    * 写入数据后
+    */
+    public function after_insert($id){
+    }
+    
+    /**
+    * 更新数据前
+    */
+    public function before_update(&$data,$where){
+    }
+    /**
+    * 更新数据后
+    */
+    public function after_update($data,$where){
+    }
+    /**
+    * 删除前
+    */
+    public function before_del(&$where)
+    {        
+    }
+    /**
+    * 删除后
+    */
+    public function after_del($row_count,$where)
+    {        
+    }
+~~~
+
 ## License
 
 [Apache License 2.0](LICENSE)
