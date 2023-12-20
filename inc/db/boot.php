@@ -1,6 +1,7 @@
 <?php 
 include __DIR__.'/Medoo.php';
 include __DIR__.'/function.php';
+include __DIR__.'/model.php';
 global $_db,$_db_active,$_db_connects; 
 //连接默认数据库  
 if($medoo_db_config['db_user'] && $medoo_db_config['db_pwd']){ 
