@@ -434,9 +434,20 @@ class user extends \model{
         ],
         'email'=>[
             ['email'],
-        ] 
-    ];
+        ],
+        'phonech'=>[
+            ['phone']
+        ],
+        'unique'=>[
+            ['phone',],
+            ['email',], 
+        ]
+    ]; 
 
+    protected $unique_message = [
+        '手机号已存在',
+        '邮件已存在',
+    ];
     
 
     /**

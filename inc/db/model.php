@@ -7,6 +7,7 @@ class model{
 	protected $field = [];
 	protected $validate_add = [];
 	protected $validate_edit = [];
+	protected $unique_message = [];
 	/*
 	https://github.com/vlucas/valitron
 	*/
@@ -32,10 +33,28 @@ class model{
 	public function before_insert(&$data){
 		$validate = $this->validate_add?:$this->validate; 
 		if($this->field && $validate){
+			$unique = $validate['unique']; 
+			unset($validate['unique']);
 			$vali = validate($this->field,$data,$validate);
 			if($vali){
 			    json($vali);
 			} 
+			if($unique){
+				foreach($unique as $i=>$v){
+					$where = [];
+					$f1 = "";
+					foreach($v as $f){
+						$where[$f] = $data[$f];
+						if(!$f1){
+							$f1 = $f;
+						}
+					}
+					$res = $this->find($where);
+					if($res){
+						json_error(['msg'=>$this->unique_message[$i]?:'记录已存在','key'=>$f1]);
+					}
+				}
+			}
 		} 
 	}
 	/**
@@ -48,12 +67,32 @@ class model{
 	* 更新数据前
 	*/
 	public function before_update(&$data,$where){
+		$id = $where[$this->primary];
 		$validate = $this->validate_edit?:$this->validate;  
 		if($this->field && $validate){ 
+			$unique = $validate['unique']; 
+			unset($validate['unique']);
 			$vali  = validate($this->field,$data,$validate); 
 			if($vali){
 			    json($vali);
 			} 
+			if($unique){
+				foreach($unique as $i=>$v){
+					$con = [];
+					$f1 = "";
+					foreach($v as $f){
+						$con[$f] = $data[$f];
+						if(!$f1){
+							$f1 = $f;
+						}
+					} 
+					$res = $this->find($con,1);
+					if($res && $res[$this->primary] != $id){ 
+						json_error(['msg'=>$this->unique_message[$i]?:'记录已存在','key'=>$f1]);	 
+					}
+					
+				}
+			}
 		}
 
 	}
