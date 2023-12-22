@@ -409,15 +409,49 @@ db_struct_table_range('my_table',[
 ~~~
 
 ## 使用model
-~~~
-class GoodsModel extends \model{ 
-    protected $table = 'wp_e_events';
 
+验证规则 
+
+https://github.com/vlucas/valitron
+
+~~~
+<?php   
+ 
+namespace model; 
+
+class user extends \model{ 
+    protected $table = 'users';
+
+    protected $field = [
+        'name'  => '姓名',
+        'phone' => '手机号',
+        'email' => '邮件',
+    ];
+
+    protected $validate = [
+        'required'=>[
+            'name','phone','email',
+        ],
+        'email'=>[
+            ['email'],
+        ] 
+    ];
+
+    
+
+    /**
+    * 写入数据前
+    */
+    public function before_insert(&$data){ 
+        $data['created_at'] = now();
+        parent::before_insert($data);
+    }
 }
 ~~~
 
-model事件
 
+
+model事件 
 
 ~~~
     /**

@@ -3,6 +3,18 @@
 class model{
 	protected $table   = '';
 	protected $primary = 'id';
+
+	protected $field = [];
+	protected $validate_add = [];
+	protected $validate_edit = [];
+	/*
+	https://github.com/vlucas/valitron
+	*/
+	protected $validate = []; 
+	public function __construct(){
+		$lang = 'zh-cn';
+		\lib\Validate::lang($lang);
+	}
 	/**
 	* 查寻前
 	*/
@@ -18,6 +30,13 @@ class model{
 	* 写入数据前
 	*/
 	public function before_insert(&$data){
+		$validate = $this->validate_add?:$this->validate; 
+		if($this->field && $validate){
+			$vali = validate($this->field,$data,$validate);
+			if($vali){
+			    json($vali);
+			} 
+		} 
 	}
 	/**
 	* 写入数据后
@@ -29,6 +48,14 @@ class model{
 	* 更新数据前
 	*/
 	public function before_update(&$data,$where){
+		$validate = $this->validate_edit?:$this->validate;  
+		if($this->field && $validate){ 
+			$vali  = validate($this->field,$data,$validate); 
+			if($vali){
+			    json($vali);
+			} 
+		}
+
 	}
 	/**
 	* 更新数据后
