@@ -35,6 +35,7 @@ class model{
 		if($this->field && $validate){
 			$unique = $validate['unique']; 
 			unset($validate['unique']);
+			$data = $data?:[];
 			$vali = validate($this->field,$data,$validate);
 			if($vali){
 			    json($vali);
@@ -72,6 +73,7 @@ class model{
 		if($this->field && $validate){ 
 			$unique = $validate['unique']; 
 			unset($validate['unique']);
+			$data = $data?:[];
 			$vali  = validate($this->field,$data,$validate); 
 			if($vali){
 			    json($vali);
