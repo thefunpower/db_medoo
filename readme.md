@@ -533,6 +533,56 @@ $model->find(['name[~]'=>'test']);
 
 返回的记录中将同时有`name` `title`
 
+model查询
+
+~~~
+$model->find($id) //返回一条记录 $id是int类型
+$model->find(['name'=>'t'],$limit=1)  //返回一条记录
+$model->find(['name'=>'t'])  //返回所有记录
+~~~
+
+insert
+
+~~~
+$model->insert($data)
+~~~
+
+update
+~~~
+$model->update($data,$where = '')
+~~~
+
+pager
+~~~
+$model->pager($join, $columns = null, $where = null)
+~~~
+
+sum
+
+~~~
+$model->sum($filed,$where = '')
+~~~
+
+count
+~~~
+$model->count($where = '')
+~~~
+
+delete
+~~~
+$model->del($where = '')
+~~~
+
+max
+~~~
+$model->max($filed,$where = '')
+~~~
+
+min 
+~~~
+$model->min($filed,$where = '')
+~~~
+
 ## License
 
 [Apache License 2.0](LICENSE)

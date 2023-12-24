@@ -171,7 +171,7 @@ class model{
 	public function count($where = ''){
 		$this->_where($where);
 		return db_get_count($this->table,$this->primary,$where);
-	}
+	} 
 	/**
 	* MAX
 	*/
@@ -202,7 +202,7 @@ class model{
 		$res = db_del($this->table,$where);
 		$this->after_del($where);
 		return $res;
-	}
+	} 
 	/**
 	* 查寻记录
 	*/
@@ -213,23 +213,7 @@ class model{
 		$this->_where($where);
 		if($limit){
 			$where['LIMIT'] = $limit;
-		} 
-		$ln = $this->field_ln;
-		if($ln){
-			foreach($where as $k=>$v){
-				if(strpos($k,'[') !==false ){
-					$k1 = substr($k,0,strpos($k,'['));
-					$k2 = substr($k,strpos($k,'[')); 
-					if($ln[$k1]){
-						unset($where[$k]);
-						$where[$ln[$k1].$k2] = $v;
-					}
-				}else if($ln[$k]){
-					unset($where[$k]);
-					$where[$ln[$k]] = $v;
-				}
-			}
-		}
+		}  
 		$this->before_find($where);
 		if($limit && $limit==1){
 			$res = db_get_one($this->table,"*",$where);
@@ -249,6 +233,22 @@ class model{
 		}
 		if(!$where){
 			$where = [];
+		}
+		$ln = $this->field_ln;
+		if($ln){
+			foreach($where as $k=>$v){
+				if(strpos($k,'[') !==false ){
+					$k1 = substr($k,0,strpos($k,'['));
+					$k2 = substr($k,strpos($k,'[')); 
+					if($ln[$k1]){
+						unset($where[$k]);
+						$where[$ln[$k1].$k2] = $v;
+					}
+				}else if($ln[$k]){
+					unset($where[$k]);
+					$where[$ln[$k]] = $v;
+				}
+			}
 		}
 	}
 }
