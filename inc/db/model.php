@@ -10,6 +10,7 @@ class model{
 	protected $unique_message = []; 
 	/**
 	* 字段映射 名字=>数据库中字段名
+	* 仅支持find方法
 	*/
 	protected $field_ln = [
         
