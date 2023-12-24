@@ -583,6 +583,11 @@ min
 $model->min($filed,$where = '')
 ~~~
 
+distint 
+~~~
+$model->select(['@phone'])
+~~~
+
 ## License
 
 [Apache License 2.0](LICENSE)

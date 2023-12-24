@@ -202,7 +202,15 @@ class model{
 		$res = db_del($this->table,$where);
 		$this->after_del($where);
 		return $res;
-	} 
+	}
+	/**
+	* 原生
+	* select(['@phone']) distinct
+	*/
+	public function select($join , $columns = null, $where = null){
+		$res = medoo_db()->select($this->table, $join, $columns, $where);
+		return $res;
+	}
 	/**
 	* 查寻记录
 	*/
