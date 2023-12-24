@@ -454,6 +454,7 @@ class user extends \model{
     * 写入数据前
     */
     public function before_insert(&$data){ 
+        parent::before_insert($data);
         $data['created_at'] = now();
         parent::before_insert($data);
     }
@@ -462,7 +463,7 @@ class user extends \model{
 
 
 
-model事件 
+model事件，注意使用`parent::`
 
 ~~~
     /**
@@ -510,6 +511,27 @@ model事件
     {        
     }
 ~~~
+
+字段映射
+
+~~~
+protected $field_ln = [
+    'title' => 'name', 
+];
+~~~
+
+`name`是数据库中真实存在的字段,`title`是自己定义了字段。
+
+~~~
+$model->find(['title[~]'=>'test']);
+~~~
+
+等同于
+~~~
+$model->find(['name[~]'=>'test']);
+~~~
+
+返回的记录中将同时有`name` `title`
 
 ## License
 
