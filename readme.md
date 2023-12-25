@@ -583,7 +583,7 @@ min
 $model->min($filed,$where = '')
 ~~~
 
-distint 
+DISTINCT 
 
 ~~~
 //$res = $m->find(['@mobile','name']);
