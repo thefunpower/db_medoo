@@ -584,8 +584,14 @@ $model->min($filed,$where = '')
 ~~~
 
 distint 
+
 ~~~
-$model->select(['@phone'])
+//$res = $m->find(['@mobile','name']);
+$res = $m->find([
+    //"name2" => db_raw("COUNT(DISTINCT <title>)"),
+    '@title',
+    'phone',
+]);
 ~~~
 
 ## License

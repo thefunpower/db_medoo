@@ -34,6 +34,7 @@ class model{
 	public function after_find(&$data){
 		$ln = $this->field_ln;
 		if($ln){
+			$data['_has_ln'] = true;
 			foreach($ln as $k=>$v){
 				if($data[$v]){
 					$data[$k] = $data[$v];
@@ -224,11 +225,47 @@ class model{
 			$where['LIMIT'] = $limit;
 		}  
 		$this->before_find($where);
+		$ln = $this->field_ln;
+		$use_select = false;
+		foreach($where as $k=>$v){ 
+			if(is_string($v) && strpos($v,'@')!==false){
+				$find = substr($v,1);
+				if($ln && $ln[$find]){
+					$where[$k] = "@".$ln[$find];
+				}
+				$use_select = true;
+			}
+			if(is_object($v)){
+				$vv = $v->value;
+				if($vv && is_string($vv) && strpos($vv,'DISTINCT')!==false){
+					preg_match_all("/<(.*)>/", $vv, $matches); 
+					$a = $matches[0];
+					$b = $matches[1];
+					if($a && $b){
+						foreach($b as $k_b=>$b1){ 
+							if($ln[$b1]){
+								$vv = str_replace($a[$k_b],$ln[$b1],$vv);
+							}
+						}
+						$where[$k]->value = $vv; 
+					} 
+					$use_select = true;
+				}
+			}
+		} 
 		if($limit && $limit==1){
-			$res = db_get_one($this->table,"*",$where);
+			if($use_select){
+				$res = $this->select($where); 
+			}else{
+				$res = db_get_one($this->table,"*",$where);
+			}
 			$this->after_find($res);
-		}else{
-			$res = db_get($this->table,"*",$where);	
+		}else{		
+			if($use_select){
+				$res = $this->select($where); 
+			}else{
+				$res = db_get($this->table,"*",$where);		
+			} 
 			foreach($res as &$v){
 				$this->after_find($v);
 			}
