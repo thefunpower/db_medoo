@@ -22,7 +22,9 @@ class model{
 	public function __construct(){
 		$lang = 'zh-cn';
 		\lib\Validate::lang($lang);
+		$this->init();
 	}
+	protected function init(){}
 	/**
 	* 查寻前
 	*/
