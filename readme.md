@@ -329,10 +329,10 @@ $where);
 
 ~~~
 $lists = db_get('do_order', [ 
-    'count' => 'COUNT(`id`)',
+    'count' => 'COUNT(`id`)', // 对应 select COUNT(`id`) as count
     'total' => 'SUM(`total_fee`)',
     'date'  => "FROM_UNIXTIME(`inserttime`, '%Y-%m-%d')"
-], 
+],$where); 
 ~~~
 
 ## field 排序
