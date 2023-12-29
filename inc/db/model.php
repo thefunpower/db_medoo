@@ -218,7 +218,7 @@ class model{
 	/**
 	* 查寻记录
 	*/
-	public function find($where='',$limit=''){
+	public function find($where='',$limit='',$use_select = false){
 		if(!is_array($where) && $where){
 			$limit = 1;
 		}
@@ -227,33 +227,33 @@ class model{
 			$where['LIMIT'] = $limit;
 		}  
 		$this->before_find($where);
-		$ln = $this->field_ln;
-		$use_select = false;
-		foreach($where as $k=>$v){ 
-			if(is_string($v) && strpos($v,'@')!==false){
-				$find = substr($v,1);
-				if($ln && $ln[$find]){
-					$where[$k] = "@".$ln[$find];
-				}
-				$use_select = true;
-			}
-			if(is_object($v)){
-				$vv = $v->value;
-				if($vv && is_string($vv) && strpos($vv,'DISTINCT')!==false){
-					preg_match_all("/<(.*)>/", $vv, $matches); 
-					$a = $matches[0];
-					$b = $matches[1];
-					if($a && $b){
-						foreach($b as $k_b=>$b1){ 
-							if($ln[$b1]){
-								$vv = str_replace($a[$k_b],$ln[$b1],$vv);
-							}
-						}
-						$where[$k]->value = $vv; 
+		$ln = $this->field_ln; 
+		if($use_select){
+			foreach($where as $k=>$v){ 
+				if(is_string($v) && substr($v,0,1) == '@'){
+					$find = substr($v,1);
+					if($ln && $ln[$find]){
+						$where[$k] = "@".$ln[$find];
 					} 
-					$use_select = true;
 				}
-			}
+				if(is_object($v)){
+					$vv = $v->value;
+					if($vv && is_string($vv) && strpos($vv,'DISTINCT')!==false){
+						preg_match_all("/<(.*)>/", $vv, $matches); 
+						$a = $matches[0];
+						$b = $matches[1];
+						if($a && $b){
+							foreach($b as $k_b=>$b1){ 
+								if($ln[$b1]){
+									$vv = str_replace($a[$k_b],$ln[$b1],$vv);
+								}
+							}
+							$where[$k]->value = $vv; 
+						} 
+						$use_select = true;
+					}
+				}
+			} 
 		} 
 		if($limit && $limit==1){
 			if($use_select){

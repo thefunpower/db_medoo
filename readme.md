@@ -586,12 +586,12 @@ $model->min($filed,$where = '')
 DISTINCT 
 
 ~~~
-//$res = $m->find(['@mobile','name']);
+//$res = $m->find(['@mobile','name'],$limit = '' ,true);
 $res = $m->find([
     //"name2" => db_raw("COUNT(DISTINCT <title>)"),
     '@title',
     'phone',
-]);
+],$limit = '' ,true);
 ~~~
 
 ## License
