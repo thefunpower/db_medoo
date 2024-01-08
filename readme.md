@@ -594,6 +594,26 @@ $res = $m->find([
 ],$limit = '' ,true);
 ~~~
 
+## 数据库结构比较
+
+生成数据库结构差量SQL
+
+`project_base`为基础结构，其他的的`project_user_*`为需要被同步的结构
+
+~~~
+$sql = create_db_compare_sql([
+    'host' => '127.0.0.1',
+    'name' => 'project_base',
+    'user' => 'root',
+    'pwd' => '111111'
+], [
+    'project_user_',
+], $is_like = true);
+~~~
+
+其中`$is_like`表示是否是`like`效果。
+
+
 ## License
 
 [Apache License 2.0](LICENSE)
