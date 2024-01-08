@@ -618,4 +618,7 @@ $sql = create_db_compare_sql([
 
 [Apache License 2.0](LICENSE)
 
+本项目包含的第三方源码和二进制文件之版权信息另行标注。
+
+
 
