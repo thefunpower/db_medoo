@@ -17,7 +17,10 @@ function create_db_compare_sql($db_compare_config, $need_compare_dbs = [], $is_l
         $need_sync_sql_struct = $v['data'];
         $sql .= db_compare_create_sync_sql($main_sql_struct, $need_sync_sql_struct, $v['name']);
     }
-    return "START TRANSACTION;\n" . $sql . "COMMIT;\n\n";
+    $sql = trim($sql);
+    if($sql) {
+        return "START TRANSACTION;\n" . $sql . "COMMIT;\n\n";
+    }
 }
 /**
 * 主库信息
@@ -31,10 +34,10 @@ function db_compare_main($db_compare_config = [])
       'db_name' => $db_compare_config['db_name'],
       'db_user' => $db_compare_config['db_user'],
       'db_pwd'  => $db_compare_config['db_pwd'],
-      'db_port' => $db_compare_config['db_port']?: 3306,
+      'db_port' => $db_compare_config['db_port'] ?: 3306,
     ];
     $db1 = new_db($db_config);
-    $name = $db_compare_config['db_name']?:$db_compare_config['name'];
+    $name = $db_compare_config['db_name'] ?: $db_compare_config['name'];
     $sql  = "SHOW TABLE STATUS FROM `{$name}`";
     $all  = $db1->query($sql, [])->fetchAll();
     if($all) {
@@ -85,7 +88,7 @@ function db_compare_sync($db_compare_config, $sync_tables = [])
           'db_name' => trim($name),
           'db_user' => $db_compare_config['db_user'],
           'db_pwd'  => $db_compare_config['db_pwd'],
-          'db_port' => $db_compare_config['db_port']?: 3306,
+          'db_port' => $db_compare_config['db_port'] ?: 3306,
         ];
         $db1  = new_db($c);
         $sql  = "SHOW TABLE STATUS FROM `{$name}`";
@@ -122,7 +125,7 @@ function db_compare_sync_like($db_compare_config, $need_sync_dbs = [])
       'db_name' => $db_compare_config['db_name'],
       'db_user' => $db_compare_config['db_user'],
       'db_pwd'  => $db_compare_config['db_pwd'],
-      'db_port' => $db_compare_config['db_port']?: 3306,
+      'db_port' => $db_compare_config['db_port'] ?: 3306,
     ];
     $db1  = new_db($c);
     $all  = $db1->query($sql, [])->fetchAll();
