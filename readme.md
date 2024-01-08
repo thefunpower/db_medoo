@@ -602,10 +602,10 @@ $res = $m->find([
 
 ~~~
 $sql = create_db_compare_sql([
-    'host' => '127.0.0.1',
-    'name' => 'project_base',
-    'user' => 'root',
-    'pwd' => '111111'
+    'db_host' => '127.0.0.1',
+    'db_name' => 'project_base',
+    'db_user' => 'root',
+    'db_pwd' => '111111'
 ], [
     'project_user_',
 ], $is_like = true);

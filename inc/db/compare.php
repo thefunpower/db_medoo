@@ -27,11 +27,11 @@ function db_compare_main($db_compare_config = [])
 {
     global $db_compare_table_comment;
     $db_config = [
-      'db_host' => $db_compare_config['db_host']?:$db_compare_config['host'],
-      'db_name' => $db_compare_config['db_name']?:$db_compare_config['name'],
-      'db_user' => $db_compare_config['db_user']?:$db_compare_config['user'],
-      'db_pwd'  => $db_compare_config['db_pwd']?:$db_compare_config['pwd'],
-      'db_port' => $db_compare_config['db_port']?:$db_compare_config['port'] ?: 3306,
+      'db_host' => $db_compare_config['db_host'],
+      'db_name' => $db_compare_config['db_name'],
+      'db_user' => $db_compare_config['db_user'],
+      'db_pwd'  => $db_compare_config['db_pwd'],
+      'db_port' => $db_compare_config['db_port']?: 3306,
     ];
     $db1 = new_db($db_config);
     $name = $db_compare_config['db_name']?:$db_compare_config['name'];
@@ -81,11 +81,11 @@ function db_compare_sync($db_compare_config, $sync_tables = [])
 {
     foreach($sync_tables as $name) {
         $c = [
-          'db_host' => $db_compare_config['db_host']?:$db_compare_config['host'],
+          'db_host' => $db_compare_config['db_host'],
           'db_name' => trim($name),
-          'db_user' => $db_compare_config['db_user']?:$db_compare_config['user'],
-          'db_pwd'  => $db_compare_config['db_pwd']?:$db_compare_config['pwd'],
-          'db_port' => $db_compare_config['db_port']?:$db_compare_config['port'] ?: 3306,
+          'db_user' => $db_compare_config['db_user'],
+          'db_pwd'  => $db_compare_config['db_pwd'],
+          'db_port' => $db_compare_config['db_port']?: 3306,
         ];
         $db1  = new_db($c);
         $sql  = "SHOW TABLE STATUS FROM `{$name}`";
@@ -118,11 +118,11 @@ function db_compare_sync_like($db_compare_config, $need_sync_dbs = [])
 {
     $sql = "SHOW DATABASES";
     $c = [
-      'db_host' => $db_compare_config['db_host']?:$db_compare_config['host'],
-      'db_name' => $db_compare_config['db_name']?:$db_compare_config['name'],
-      'db_user' => $db_compare_config['db_user']?:$db_compare_config['user'],
-      'db_pwd'  => $db_compare_config['db_pwd']?:$db_compare_config['pwd'],
-      'db_port' => $db_compare_config['db_port']?:$db_compare_config['port'] ?: 3306,
+      'db_host' => $db_compare_config['db_host'],
+      'db_name' => $db_compare_config['db_name'],
+      'db_user' => $db_compare_config['db_user'],
+      'db_pwd'  => $db_compare_config['db_pwd'],
+      'db_port' => $db_compare_config['db_port']?: 3306,
     ];
     $db1  = new_db($c);
     $all  = $db1->query($sql, [])->fetchAll();
