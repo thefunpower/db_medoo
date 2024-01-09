@@ -216,6 +216,18 @@ class model{
 		return $res;
 	}
 	/**
+	* 查寻一条记录
+	*/
+	public function find_one($where = ''){
+		return $this->find($where,1);
+	}
+	/**
+	* 查寻多条记录
+	*/
+	public function find_all($where = ''){
+		return $this->find($where);
+	}
+	/**
 	* 查寻记录
 	*/
 	public function find($where='',$limit='',$use_select = false){
