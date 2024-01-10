@@ -1,23 +1,23 @@
 <?php
 /**
 *  对数据库操作的封装
-*  https://medoo.in/api/where 
-*/   
+*  https://medoo.in/api/where
+*/
 /**
 复杂的查寻，(...  AND ...) OR (...  AND ...)
 "OR #1" => [
     "AND #2" => $where,
     "AND #3" => $or_where
     ]
-];  
+];
 
  */
 /**
 * 数据库对象
 * 建议使用 medoo_db()
 */
-global $_db,$_db_active,$_db_connects; 
-$_db_active  = 'default'; 
+global $_db,$_db_active,$_db_connects;
+$_db_active  = 'default';
 /**
 * 数据参数用于分页后生成分页HTML代码
 */
@@ -25,7 +25,7 @@ global $_db_par;
 /**
 * 错误信息
 */
-global $_db_error; 
+global $_db_error;
 /**
  * 激活平台数据库连接，平台数据库不支持从库读
  */
@@ -57,7 +57,7 @@ function db_active($name = 'default')
     $_db_active  = $name;
 }
 /**
-* 获取当前启用的数据库连接 
+* 获取当前启用的数据库连接
 */
 function get_db_active_name()
 {
@@ -67,36 +67,38 @@ function get_db_active_name()
 /**
 * 判断是否可运行action
 */
-function db_can_run_action(){
+function db_can_run_action()
+{
     $name = get_db_active_name();
     //数据库连接平台时是不能使用action的
-    if($name == 'main'){
+    if($name == 'main') {
         return false;
-    } 
+    }
     return true;
 }
 /**
 * 数据库是否可执行更新操作
 */
-function db_can_run_update($sql = ''){
+function db_can_run_update($sql = '')
+{
     $name = get_db_active_name();
-    if($name == 'read'){
-        if($sql){
-            if(strpos(strtoupper($sql),'UPDATE') !== false){
+    if($name == 'read') {
+        if($sql) {
+            if(strpos(strtoupper($sql), 'UPDATE') !== false) {
                 return false;
-            }else{
+            } else {
                 return true;
             }
         }
         return false;
-    } 
+    }
     return true;
 }
 
-/** 
+/**
  * 连接数据库
  */
-function new_db($config = [],$name = '')
+function new_db($config = [], $name = '')
 {
     global $_db_connects;
     $_db = new \Medoo\Medoo([
@@ -119,7 +121,7 @@ function new_db($config = [],$name = '')
             'SET SQL_MODE=ANSI_QUOTES'
         ]
     ]);
-    if($name){
+    if($name) {
         $_db_connects[$name] = $_db;
     }
     return $_db;
@@ -131,28 +133,29 @@ function new_db($config = [],$name = '')
  */
 function medoo_db()
 {
-    global $_db_connects,$_db_active; 
+    global $_db_connects,$_db_active;
     $db_connect =  $_db_connects[$_db_active];
-    if(!$db_connect){
+    if(!$db_connect) {
         exit("Lost connect");
-    }else{
+    } else {
         return $db_connect;
     }
 }
-if(!function_exists('db')){
-    function db(){
+if(!function_exists('db')) {
+    function db()
+    {
         return medoo_db();
     }
 }
 /***
- * 分页查寻 
+ * 分页查寻
  JOIN
- $where = [ 
+ $where = [
     //"do_order.id"=>1,
     'ORDER'=>[
         'do_order.id'=>'DESC'
     ]
-]; 
+];
 
 int date
 $where['printer_refund_apply.created_at[<>]']  = [
@@ -177,35 +180,35 @@ $data = db_pager("do_order",
     $where);
 
  * @param string $table 表名
- * @param string $column 字段 
- * @param array $where  条件 [LIMIT=>1]  
+ * @param string $column 字段
+ * @param array $where  条件 [LIMIT=>1]
  * @return array
- */ 
+ */
 function db_pager($table, $join, $columns = null, $where = null)
 {
-    if(!$columns){
+    if(!$columns) {
         $columns = $join;
-        $join = '*'; 
-    } 
+        $join = '*';
+    }
     global $_db_par;
     $flag = true;
     if (!$where) {
         $where   = $columns;
         $columns = $join ?: "*";
         $join    = '';
-        if($where && is_string($where)){
+        if($where && is_string($where)) {
             $where = [];
         }
         $count   = db_pager_count() ?: db_get_count($table, $where);
-    } else if ($join && $where) {
+    } elseif ($join && $where) {
         $flag    = false;
         $count   = db_pager_count() ?: db_get_count($table, $join, "$table.id", $where);
     }
-    if($where && is_string($where)){
+    if($where && is_string($where)) {
         $where = [];
     }
-    $current_page  = (int)(g('page')?:1);
-    $per_page      = (int)(g('per_page')?:20); 
+    $current_page  = (int)(g('page') ?: 1);
+    $per_page      = (int)(g('per_page') ?: 20);
     $count         = (int)$count;
     $last_page     = ceil($count / $per_page);
     $has_next_page = $last_page > $current_page ? true : false;
@@ -214,7 +217,7 @@ function db_pager($table, $join, $columns = null, $where = null)
         $where->value =  $where->value . " LIMIT $start, $per_page";
     } else {
         $where['LIMIT'] = [$start, $per_page];
-    } 
+    }
     if ($flag) {
         $data  =  db_get($table, $columns, $where);
     } else {
@@ -225,7 +228,7 @@ function db_pager($table, $join, $columns = null, $where = null)
     return [
         'current_page' => $current_page,
         'last_page'    => $last_page,
-        'per_page'     => $per_page, 
+        'per_page'     => $per_page,
         'total'        => $count,
         'has_next_page' => $has_next_page,
         'data'         => $data,
@@ -260,7 +263,7 @@ function db_pager_html($arr = [])
     } else {
         $count = $_db_par['count'];
     }
-    $page_url = isset($arr['url'])?$arr['url']:'';
+    $page_url = isset($arr['url']) ? $arr['url'] : '';
     if (isset($arr['size'])) {
         $size  = $arr['size'];
     } else {
@@ -274,19 +277,19 @@ function db_pager_html($arr = [])
     $offset = $paginate->offset;
     return $paginate->show();
 }
- 
+
 
 /**
 * 添加错误信息
 */
 function db_add_error($str)
-{ 
+{
     global $_db_error;
     global $_db_thor_err;
-    if($_db_thor_err){ 
-        throw new Exception($str); 
+    if($_db_thor_err) {
+        throw new Exception($str);
     }
-    $_db_error[] = $str; 
+    $_db_error[] = $str;
 }
 /**
 * 获取错误信息
@@ -294,23 +297,24 @@ function db_add_error($str)
 function db_get_error()
 {
     global $_db_error;
-    if ($_db_error)
+    if ($_db_error) {
         return $_db_error;
+    }
 }
 
 function db_get_fast($table, $join = null, $columns = null, $where = null)
-{ 
-    if($join == '*'){
+{
+    if($join == '*') {
         $join = "id";
-        $in = db_get($table, $join, $columns, $where); 
-        if($in){
+        $in = db_get($table, $join, $columns, $where);
+        if($in) {
             $join = "*";
-            $where['id'] = $in; 
+            $where['id'] = $in;
             return db_get($table, $join, $where);
-        }else{
+        } else {
             return;
         }
-    }else{
+    } else {
         return db_get($table, $join, $columns, $where);
     }
 }
@@ -321,17 +325,17 @@ function db_get_fast($table, $join = null, $columns = null, $where = null)
  * select($table, $columns, $where)
  * select($table, $join, $columns, $where)
  * @param string $table 表名
- * @param string $column 字段 
- * @param array $where  条件 [LIMIT=>1]  
+ * @param string $column 字段
+ * @param array $where  条件 [LIMIT=>1]
  * @return array
  */
 function db_get($table, $join = null, $columns = null, $where = null)
 {
-    do_action("db_table.$table",$table);
-    if(!$columns || is_numeric($columns)){
+    do_action("db_table.$table", $table);
+    if(!$columns || is_numeric($columns)) {
         $columns = $join;
         $join = '*';
-        if(is_numeric($columns)){
+        if(is_numeric($columns)) {
             $where['LIMIT'] = $columns;
         }
     }
@@ -342,36 +346,37 @@ function db_get($table, $join = null, $columns = null, $where = null)
             }
         }
     }
-    if (is_string($columns) && strpos($columns, 'WHERE') !== FALSE) {
+    if (is_string($columns) && strpos($columns, 'WHERE') !== false) {
         $columns = db_raw($columns);
-    } 
-    $all =  medoo_db()->select($table, $join, $columns, $where);
-    if($all){
-        foreach($all as &$v){
-            db_row_json_to_array($table,$v);
-        }
-    } 
-    //查寻数据 
-    if(db_can_run_action()){ 
-        foreach($all as &$v){
-            if($v && is_array($v))
-            do_action("db_get_one.$table", $v);    
-        }
-    } 
-    if(medoo_db()->error){
-        db_add_error(medoo_db()->errorInfo[2]); 
     }
-    return $all; 
-    
+    $all =  medoo_db()->select($table, $join, $columns, $where);
+    if($all) {
+        foreach($all as &$v) {
+            db_row_json_to_array($table, $v);
+        }
+    }
+    //查寻数据
+    if(db_can_run_action()) {
+        foreach($all as &$v) {
+            if($v && is_array($v)) {
+                do_action("db_get_one.$table", $v);
+            }
+        }
+    }
+    if(medoo_db()->error) {
+        db_add_error(medoo_db()->errorInfo[2]);
+    }
+    return $all;
+
 }
-/** 
-$lists = db_select('do_order', [ 
+/**
+$lists = db_select('do_order', [
             'count' => 'COUNT(`id`)',
             'total' => 'SUM(`total_fee`)',
             'date'  => "FROM_UNIXTIME(`inserttime`, '%Y-%m-%d')"
-        ], 
+        ],
         'WHERE `status` = 1 GROUP BY `date` LIMIT 30'
-);  
+);
  */
 function db_select($table, $join = "*", $columns = null, $where = null)
 {
@@ -380,70 +385,70 @@ function db_select($table, $join = "*", $columns = null, $where = null)
 /**
  * 写入记录
  *
- * @param string $table 表名 
- * @param array  $data  数据 
+ * @param string $table 表名
+ * @param array  $data  数据
  * @return array
  */
-function db_insert($table, $data = [],$don_run_action = false)
+function db_insert($table, $data = [], $don_run_action = false)
 {
-    do_action("db_table.$table",$table);
+    do_action("db_table.$table", $table);
     foreach ($data as $k => $v) {
         if (substr($k, 0, 1) == "_") {
             unset($data[$k]);
         }
-    } 
-    //写入数据前 
-    if(db_can_run_action() && !$don_run_action){
+    }
+    //写入数据前
+    if(db_can_run_action() && !$don_run_action) {
         do_action("db_insert.$table.before", $data);
         do_action("db_save.$table.before", $data);
     }
-    foreach($data as $k=>$v){ 
-        if(get_table_field_is_json($table,$k)){
-            if($v && !is_array($v)){
-                $arr = json_decode($v,true);
-                if($arr){
+    foreach($data as $k => $v) {
+        if(get_table_field_is_json($table, $k)) {
+            if($v && !is_array($v)) {
+                $arr = json_decode($v, true);
+                if($arr) {
                     $v = $arr;
-                }else{
+                } else {
                     $v = yaml($v);
-                } 
+                }
             }
-            if(!$v){
+            if(!$v) {
                 $v = [];
             }
         }
-        if(is_array($v)){
-            $data[$k] = json_encode($v,JSON_UNESCAPED_UNICODE);   
-        }else{
-            $data[$k] = $v;  
-        }          
-    }  
+        if(is_array($v)) {
+            $data[$k] = json_encode($v, JSON_UNESCAPED_UNICODE);
+        } else {
+            $data[$k] = $v;
+        }
+    }
     $_db    = medoo_db()->insert($table, $data);
     $id = medoo_db()->id();
     //写入数据后
     $action_data = [];
     $action_data['id'] = $id;
     $action_data['data'] = $data;
-    if(db_can_run_action() && !$don_run_action){
+    if(db_can_run_action() && !$don_run_action) {
         do_action("db_insert.$table.after", $action_data);
         do_action("db_save.$table.after", $action_data);
     }
-    if(medoo_db()->error){
-        db_add_error(medoo_db()->errorInfo[2]); 
+    if(medoo_db()->error) {
+        db_add_error(medoo_db()->errorInfo[2]);
     }
-    return $id; 
+    return $id;
 }
 
 /**
  * 更新记录
  *
- * @param string $table 表名 
- * @param array  $data  数据 
+ * @param string $table 表名
+ * @param array  $data  数据
  * @return array
  */
-function db_update($table, $data = [], $where = [],$don_run_action = false)
+function db_update($table, $data = [], $where = [], $don_run_action = false)
 {
-    do_action("db_table.$table",$table);
-    if(!db_can_run_update()){
+    do_action("db_table.$table", $table);
+    if(!db_can_run_update()) {
         exit('从库禁止运行update操作');
     }
     global $_db_where;
@@ -453,52 +458,52 @@ function db_update($table, $data = [], $where = [],$don_run_action = false)
         if (substr($k, 0, 1) == "_") {
             unset($data[$k]);
         }
-    } 
-    //更新数据前 
-    if(db_can_run_action() && !$don_run_action){
+    }
+    //更新数据前
+    if(db_can_run_action() && !$don_run_action) {
         do_action("db_update.$table.before", $data);
         do_action("db_save.$table.before", $data);
     }
-    foreach($data as $k=>$v){
-        if(get_table_field_is_json($table,$k)){
-            if($v && !is_array($v)){
-                $arr = json_decode($v,true);
-                if($arr){
+    foreach($data as $k => $v) {
+        if(get_table_field_is_json($table, $k)) {
+            if($v && !is_array($v)) {
+                $arr = json_decode($v, true);
+                if($arr) {
                     $v = $arr;
-                }else{
+                } else {
                     $v = yaml($v);
-                } 
+                }
             }
-            if(!$v){
+            if(!$v) {
                 $v = [];
             }
         }
-        if(is_array($v)){
-            $data[$k] = json_encode($v,JSON_UNESCAPED_UNICODE);   
-        }else if(is_string($v)){ 
-            $data[$k] = $v;  
-        }          
-    } 
+        if(is_array($v)) {
+            $data[$k] = json_encode($v, JSON_UNESCAPED_UNICODE);
+        } elseif(is_string($v)) {
+            $data[$k] = $v;
+        }
+    }
     $_db    = medoo_db()->update($table, $data, $where);
     $error = medoo_db()->error;
-    if ($error) { 
+    if ($error) {
         throw new Exception($error);
     }
     $count =  $_db->rowCount();
     //更新数据后
     $action_data = [];
-    $action_data['where'] = $where; 
-    $action_data['id']    = $where['id']?:'';
+    $action_data['where'] = $where;
+    $action_data['id']    = $where['id'] ?: '';
     $action_data['data']  = $data;
-    if(db_can_run_action() && !$don_run_action ){
+    if(db_can_run_action() && !$don_run_action) {
         do_action("db_update.$table.after", $action_data);
         do_action("db_save.$table.after", $action_data);
     }
-    if(medoo_db()->error){
-        db_add_error(medoo_db()->errorInfo[2]); 
+    if(medoo_db()->error) {
+        db_add_error(medoo_db()->errorInfo[2]);
     }
     return $count;
-     
+
 }
 
 /**
@@ -511,29 +516,30 @@ function db_action($call)
     $is_db_action = true;
     $result = "";
     $_db     = medoo_db();
-    $_db->action(function ($_db) use (&$result, $call) { 
+    $_db->action(function ($_db) use (&$result, $call) {
         $call();
     });
 }
 /**
 * 对数据进行
 */
-function db_for_update($table,$id){
+function db_for_update($table, $id)
+{
     global $is_db_action;
-    if(!$is_db_action){
+    if(!$is_db_action) {
         exit('query error:<br> db_action(function(){<br> db_for_update($table,$id);<br>});');
     }
-    return db_get($table,"*",[
-        'id'=>$id,
-        'FOR UPDATE'=>TRUE,
-    ]);  
+    return db_get($table, "*", [
+        'id' => $id,
+        'FOR UPDATE' => true,
+    ]);
 }
 /**
  * 根据表名、字段 、条件 查寻一条记录
  *
  * @param string $table 表名
- * @param string $column 字段 
- * @param array  $where 条件 
+ * @param string $column 字段
+ * @param array  $where 条件
  * @return array
  */
 function db_get_one($table, $join  = "*", $columns = null, $where = null)
@@ -546,24 +552,25 @@ function db_get_one($table, $join  = "*", $columns = null, $where = null)
     $_db = db_get($table, $join, $columns, $where);
     if ($_db) {
         $one =  $_db[0];
-        if($one){
-            db_row_json_to_array($table,$one);    
-        }        
+        if($one) {
+            db_row_json_to_array($table, $one);
+        }
         //查寻数据
-        if(db_can_run_action()){
-            if($one && is_array($one))
-            do_action("db_get_one.$table", $one);
+        if(db_can_run_action()) {
+            if($one && is_array($one)) {
+                do_action("db_get_one.$table", $one);
+            }
         }
         return $one;
     }
     return;
-}  
+}
 /**
  * SQL查寻
  */
 function db_query($sql, $raw = null)
 {
-    if(!db_can_run_update($sql)){
+    if(!db_can_run_update($sql)) {
         exit('从库禁止运行update操作');
     }
     if ($raw === null) {
@@ -573,7 +580,7 @@ function db_query($sql, $raw = null)
     if ($q) {
         $all =  $q->fetchAll(\PDO::FETCH_ASSOC) ?: [];
         //查寻数据
-        if(db_can_run_action()){
+        if(db_can_run_action()) {
             do_action("db_query", $all);
         }
         return $all;
@@ -582,76 +589,76 @@ function db_query($sql, $raw = null)
     }
 }
 /**
- * 取最小值 
+ * 取最小值
  * https://medoo.in/api/min
  * min($table, $column, $where)
  * min($table, $join, $column, $where)
  * @param string $table  表名
- * @param string $column 字段 
+ * @param string $column 字段
  * @param array $where   条件
  * @return void
  */
 function db_get_min($table, $join  = "*", $column = null, $where = null)
 {
-    do_action("db_table.$table",$table);
+    do_action("db_table.$table", $table);
     return medoo_db()->min($table, $join, $column, $where);
 }
 
 /**
- * 取最大值  
+ * 取最大值
  * max($table, $column, $where)
  * max($table, $join, $column, $where)
  * @param string $table  表名
- * @param string $column 字段 
+ * @param string $column 字段
  * @param array $where   条件
  * @return void
  */
 function db_get_max($table, $join =  "*", $column = null, $where = null)
 {
-    do_action("db_table.$table",$table);
+    do_action("db_table.$table", $table);
     return medoo_db()->max($table, $join, $column, $where);
 }
 
 /**
- * 总数  
+ * 总数
  * count($table, $where)
  * count($table, $join, $column, $where)
- * @param string $table  表名 
+ * @param string $table  表名
  * @param array $where   条件
  * @return void
  */
 function db_get_count($table, $join =  "*", $column = null, $where = null)
 {
-    do_action("db_table.$table",$table);
-    return medoo_db()->count($table, $join, $column, $where)?:0;
+    do_action("db_table.$table", $table);
+    return medoo_db()->count($table, $join, $column, $where) ?: 0;
 }
 
 /**
  * 是否有记录
  * has($table, $where)
  * has($table, $join, $where)
- * @param string $table  表名 
+ * @param string $table  表名
  * @param array $where   条件
  * @return void
  */
 function db_get_has($table, $join = null, $where = null)
 {
-    do_action("db_table.$table",$table);
+    do_action("db_table.$table", $table);
     return medoo_db()->has($table, $join, $where);
 }
 
 /**
- * 随机取多条记录  
+ * 随机取多条记录
  * rand($table, $column, $where)
  * rand($table, $join, $column, $where)
  * @param string $table  表名
- * @param string $column 字段 
+ * @param string $column 字段
  * @param array $where   条件
  * @return void
  */
 function db_get_rand($table, $join = "*", $column = null, $where = null)
 {
-    do_action("db_table.$table",$table);
+    do_action("db_table.$table", $table);
     return medoo_db()->rand($table, $join, $column, $where);
 }
 
@@ -660,28 +667,28 @@ function db_get_rand($table, $join = "*", $column = null, $where = null)
  * sum($table, $column, $where)
  * sum($table, $join, $column, $where)
  * @param string $table  表名
- * @param string $column 字段 
+ * @param string $column 字段
  * @param array $where   条件
  * @return void
  */
 function db_get_sum($table, $join = "*", $column = null, $where = null)
 {
-    do_action("db_table.$table",$table);
-    return medoo_db()->sum($table, $join, $column, $where)?:0;
+    do_action("db_table.$table", $table);
+    return medoo_db()->sum($table, $join, $column, $where) ?: 0;
 }
 
 /**
- * 取平均值 
+ * 取平均值
  * avg($table, $column, $where)
  * avg($table, $join, $column, $where)
  * @param string $table  表名
- * @param string $column 字段 
+ * @param string $column 字段
  * @param array $where   条件
  * @return void
  */
 function db_get_avg($table, $join = "*", $column = null, $where = null)
 {
-    do_action("db_table.$table",$table);
+    do_action("db_table.$table", $table);
     return medoo_db()->avg($table, $join, $column, $where);
 }
 
@@ -690,9 +697,9 @@ function db_get_avg($table, $join = "*", $column = null, $where = null)
  * https://medoo.in/api/raw
  * raw('NOW()')
  * raw('RAND()')
- * raw('AVG(<age>)') 
+ * raw('AVG(<age>)')
  * @param string $raw
- * @return  
+ * @return
  */
 function db_raw($raw)
 {
@@ -702,9 +709,9 @@ function db_raw($raw)
 //删除
 function db_del($table, $where)
 {
-    do_action("db_table.$table",$table);
+    do_action("db_table.$table", $table);
     //删除数据前
-    if(db_can_run_action()){
+    if(db_can_run_action()) {
         do_action("db_insert.$table.del", $where);
     }
     $data = medoo_db()->delete($table, $where);
@@ -740,7 +747,7 @@ function show_tables($table)
  */
 function get_table_fields($table, $has_key  = true)
 {
-    $sql   = "SHOW FULL FIELDS FROM `".$table."`";
+    $sql   = "SHOW FULL FIELDS FROM `" . $table . "`";
     $lists = medoo_db()->query($sql);
     $arr   = [];
     foreach ($lists as $vo) {
@@ -754,10 +761,10 @@ function get_table_fields($table, $has_key  = true)
 }
 /**
  *返回数据库允许的数据，传入其他字段自动忽略
- */ 
+ */
 function db_allow($table, $data)
 {
-    do_action("db_table.$table",$table);
+    do_action("db_table.$table", $table);
     $fields = get_table_fields($table);
     foreach ($data as $k => $v) {
         if (!$fields[$k]) {
@@ -804,30 +811,32 @@ function database_tables($name = null, $show_markdown = false)
 /**
  * 取表中json字段
  */
-function get_table_field_json($table){
+function get_table_field_json($table)
+{
     static $table_fields;
-    if(!isset($table_fields[$table])){
-      $all = get_table_fields($table); 
-      $table_fields_row = [];
-      foreach($all as $k=>$v){
-        if($v['Type'] == 'json'){
-            $table_fields_row[$k] = true; 
+    if(!isset($table_fields[$table])) {
+        $all = get_table_fields($table);
+        $table_fields_row = [];
+        foreach($all as $k => $v) {
+            if($v['Type'] == 'json') {
+                $table_fields_row[$k] = true;
+            }
         }
-      } 
-      $table_fields[$table] = $table_fields_row;
+        $table_fields[$table] = $table_fields_row;
     }
     return $table_fields[$table];
 }
 /**
  * 判断表中的字段是不是json
  */
-function get_table_field_is_json($table,$field){
-    $table_fields = get_table_field_json($table); 
-    if(isset($table_fields[$field])){
-      return true;
-    }else{
-      return false;
-    }    
+function get_table_field_is_json($table, $field)
+{
+    $table_fields = get_table_field_json($table);
+    if(isset($table_fields[$field])) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 /**
@@ -835,18 +844,18 @@ function get_table_field_is_json($table,$field){
 * @param $table_name 表名
 * @param $row_data 一行记录
 */
-function db_row_json_to_array($table_name,&$row_data = []){ 
-    if(is_array($row_data)){
-        foreach ($row_data as $key=>$val) {
-            if(is_string($val) && get_table_field_is_json($table_name,$key)){  
-                $row_data[$key] = json_decode($val,true)?:[];   
-            }
-            else if(is_string($val) && is_json($val)){
-                $row_data[$key] = json_decode($val,true);
-            }else if(is_string($val)){
+function db_row_json_to_array($table_name, &$row_data = [])
+{
+    if(is_array($row_data)) {
+        foreach ($row_data as $key => $val) {
+            if(is_string($val) && get_table_field_is_json($table_name, $key)) {
+                $row_data[$key] = json_decode($val, true) ?: [];
+            } elseif(is_string($val) && is_json($val)) {
+                $row_data[$key] = json_decode($val, true);
+            } elseif(is_string($val)) {
                 $row_data[$key] = stripslashes($val);
             }
-        } 
+        }
     }
 }
 
@@ -855,7 +864,7 @@ function db_row_json_to_array($table_name,&$row_data = []){
  * 数组排序
  * array_order_by($row,$order,SORT_DESC);
  */
-if(!function_exists('array_order_by')){
+if(!function_exists('array_order_by')) {
     function array_order_by()
     {
         $args = func_get_args();
@@ -863,9 +872,12 @@ if(!function_exists('array_order_by')){
         foreach ($args as $n => $field) {
             if (is_string($field)) {
                 $tmp = array();
-                if (!$data) return;
-                foreach ($data as $key => $row)
+                if (!$data) {
+                    return;
+                }
+                foreach ($data as $key => $row) {
                     $tmp[$key] = $row[$field];
+                }
                 $args[$n] = $tmp;
             }
         }
@@ -880,11 +892,11 @@ if(!function_exists('array_order_by')){
 
 
 /**
- * 判断是否为json 
+ * 判断是否为json
  */
-if(!function_exists('is_json')){
+if(!function_exists('is_json')) {
     function is_json($data, $assoc = false)
-    { 
+    {
         $data = json_decode($data, $assoc);
         if ($data && (is_object($data)) || (is_array($data) && !empty(current($data)))) {
             return $data;
@@ -902,18 +914,18 @@ if(!function_exists('is_json')){
  * @author sun <sunkangchina@163.com>
  * @return mixed
  */
-if(!function_exists("add_action")){
-    function add_action($name, $call,$level = 20)
+if(!function_exists("add_action")) {
+    function add_action($name, $call, $level = 20)
     {
         global $_app;
         if (strpos($name, '|') !== false) {
             $arr = explode('|', $name);
             foreach ($arr as $v) {
-                add_action($v, $call,$level);
+                add_action($v, $call, $level);
             }
             return;
         }
-        $_app['actions'][$name][] = ['func'=>$call,'level'=>$level];  
+        $_app['actions'][$name][] = ['func' => $call,'level' => $level];
     }
 }
 
@@ -925,15 +937,15 @@ if(!function_exists("add_action")){
  * @author sun <sunkangchina@163.com>
  * @return  mixed
  */
-if(!function_exists('do_action')){
+if(!function_exists('do_action')) {
     function do_action($name, &$par = null)
     {
         global $_app;
         if (!is_array($_app)) {
             return;
         }
-        $calls  = $_app['actions'][$name]; 
-        $calls  = array_order_by($calls,'level',SORT_DESC);  
+        $calls  = $_app['actions'][$name];
+        $calls  = array_order_by($calls, 'level', SORT_DESC);
         if ($calls) {
             foreach ($calls as $v) {
                 $func = $v['func'];
@@ -947,24 +959,24 @@ if(!function_exists('do_action')){
 
 
 /**
- *  分页 
+ *  分页
  *  类似淘宝分页
- *  　　 
+ *
  * @since 2014-2015
  */
 /**
  *<code>
- *类似淘宝分页 
- *  
- *   
- *$paginate = new medoo_paginate($row->num,1); 
+ *类似淘宝分页
+ *
+ *
+ *$paginate = new medoo_paginate($row->num,1);
  *$paginate->url = $this->url;
  *$limit = $paginate->limit;
  *$offset = $paginate->offset;
- *  
- *$paginate = $paginate->show(); 
- * 
- * 
+ *
+ *$paginate = $paginate->show();
+ *
+ *
 .pagination li{
     list-style: none;
     float: left;
@@ -978,14 +990,14 @@ if(!function_exists('do_action')){
     cursor: pointer;
 }
 .pagination .active{
-   background: #eee; 
+   background: #eee;
    border: 1px solid #000;
 }
 
- *</code>   
+ *</code>
  *
  */
- 
+
 
 class medoo_paginate
 {
@@ -997,10 +1009,10 @@ class medoo_paginate
     public $limit;
     public $offset;
     public $get = [];
-    static $class;
+    public static $class;
     public $query = 'page';
     /**
-     * 构造函数  
+     * 构造函数
      */
     public function __construct($count, $size = 10)
     {
@@ -1009,12 +1021,16 @@ class medoo_paginate
         //总页数
         $this->pages = ceil($this->count / $this->size);
         //当前页面
-        $this->page = isset($_GET[$this->query])?(int)$_GET[$this->query]:'';
-        if ($this->pages < 1) return;
-        if ($this->page <= 1)
+        $this->page = isset($_GET[$this->query]) ? (int)$_GET[$this->query] : '';
+        if ($this->pages < 1) {
+            return;
+        }
+        if ($this->page <= 1) {
             $this->page = 1;
-        if ($this->page >= $this->pages)
+        }
+        if ($this->page >= $this->pages) {
             $this->page = $this->pages;
+        }
 
         $this->offset = $this->size * ($this->page - 1);
         $this->limit = $this->size;
@@ -1022,8 +1038,8 @@ class medoo_paginate
     /**
      * 生成URL函数，如有需要，可自行改写
      * 调用函数 ($url,$par);
-     * @param string $url 　 
-     * @param string $par 　 
+     * @param string $url
+     * @param string $par
      * @return  string
      */
     public function url($url, $par = [])
@@ -1044,25 +1060,31 @@ class medoo_paginate
 
     /**
      * 显示分页 pagination
-     * @param string $class 　 
+     * @param string $class
      * @return  string
      */
     public function show($class = 'pagination')
     {
-        if (static::$class) $class = static::$class;
+        if (static::$class) {
+            $class = static::$class;
+        }
         $str = '<ul class="' . $class . '">';
         $pre = $this->page - 1;
         $p = $_GET;
         $p[$this->query] = $pre > 0 ? $pre : 1;
-        if ($pre > 0)
+        if ($pre > 0) {
             $str .= '<li><a href="' . $this->url($this->url, $p) . '">&laquo;</a></li>';
-        if ($this->pages < 2) return;
+        }
+        if ($this->pages < 2) {
+            return;
+        }
         $pages[1] = 1;
         $pages[2] = 2;
         $i = $this->page - 2 <= 1 ? 1 : $this->page - 2;
         $e = $this->page + 2 >= $this->pages ? $this->pages : $this->page + 2;
-        if ($e < 5 && $this->pages >= 5)
+        if ($e < 5 && $this->pages >= 5) {
             $e = 5;
+        }
         $pages['s'] = null;
         if ($i > 0) {
             for ($i; $i < $e + 1; $i++) {
@@ -1071,15 +1093,19 @@ class medoo_paginate
         }
         $j = 0;
         foreach ($pages as $k => $v) {
-            if ($j == 3) $n = $k;
+            if ($j == 3) {
+                $n = $k;
+            }
             $j++;
         }
 
         if ($this->pages > 5) {
-            if ($n != 3)
+            if ($n != 3) {
                 $pages['s'] = "...";
-            if ($e < $this->pages)
+            }
+            if ($e < $this->pages) {
                 $pages['e'] = "...";
+            }
         }
         $p = $_GET;
         if ($this->get) {
@@ -1090,14 +1116,18 @@ class medoo_paginate
 
         foreach ($pages as $j) {
             $active = null;
-            if ($j == $this->page)
+            if ($j == $this->page) {
                 $active = "class='active'";
-            if (!$j) continue;
+            }
+            if (!$j) {
+                continue;
+            }
             $p[$this->query] = $j;
-            if ($j == '...')
+            if ($j == '...') {
                 $str .= "<li $active><a href='javascript:void(0);' class='no'>$j</a></li>";
-            else
+            } else {
                 $str .= "<li $active><a href='" . $this->url($this->url, $p) . "'>$j</a></li>";
+            }
         }
 
         if ($this->page + 3 < $this->pages && $this->pages > 6) {
@@ -1107,8 +1137,9 @@ class medoo_paginate
             $str .= "<li><a href='" . $this->url($this->url, [$this->query => $this->pages] + $p) . "'>$this->pages</a></li>";
         }
         $p[$this->query] = $next = $this->page + 1;
-        if ($next <= $this->pages)
+        if ($next <= $this->pages) {
             $str .= '<li><a href="' . $this->url($this->url, $p) . '">&raquo;</a></li>';
+        }
 
 
         $str .= "</ul>";
@@ -1123,12 +1154,13 @@ class medoo_paginate
 * $date2 = '2022-12-14';
 * 字段是datetime类型
 */
-function db_between_date($field,$date1,$date2){
-    $start_time = date("Y-m-d 00:00:01",strtotime($date1));
-    $end_time   = date("Y-m-d 23:59:59",strtotime($date2));
+function db_between_date($field, $date1, $date2)
+{
+    $start_time = date("Y-m-d 00:00:01", strtotime($date1));
+    $end_time   = date("Y-m-d 23:59:59", strtotime($date2));
     $where = [];
-    $where[$field.'[>=]'] = $start_time;
-    $where[$field.'[<]'] = $end_time;
+    $where[$field . '[>=]'] = $start_time;
+    $where[$field . '[<]'] = $end_time;
     return $where;
 }
 /**
@@ -1137,63 +1169,65 @@ function db_between_date($field,$date1,$date2){
 * $date2 = '2022-12';
 * 字段是datetime类型
 */
-function db_between_month($field,$date1,$date2){
-    $start_time = date("Y-m-d 00:00:01",strtotime($date1."-01"));
-    $end_time   = date("Y-m-d 00:00:00",strtotime($date2."-01"." +1 month"));
+function db_between_month($field, $date1, $date2)
+{
+    $start_time = date("Y-m-d 00:00:01", strtotime($date1 . "-01"));
+    $end_time   = date("Y-m-d 00:00:00", strtotime($date2 . "-01" . " +1 month"));
     $where = [];
-    $where[$field.'[>=]'] = $start_time;
-    $where[$field.'[<]'] = $end_time;
+    $where[$field . '[>=]'] = $start_time;
+    $where[$field . '[<]'] = $end_time;
     return $where;
 }
 
 /**
 * 跨库数据库事务
-*/ 
-function xa_db_action($key_call = []) {
-  global $_db_connects;
-  global $_db_thor_err;
-  $_db_thor_err = true;
-  $find_err = false;
-  $commits = []; 
-  $active_dsn = [];
-  $only = [];
-  foreach($key_call as $key=>$call) {
-      $medoo = $_db_connects[$key];
-      $dsn = $medoo->info()['dsn'];
-      if(!$active_dsn[$dsn]){
-        $active_dsn[$dsn] = $key;
-        $only[$key] = true;  
-      } 
-      $pdo = $medoo->pdo; 
-      if(!is_object($pdo)){
-        throw new Exception("未知的数据库".$key);        
-      }
-  } 
-  try {
-    foreach($key_call as $key=>$call) {
-      $medoo = $_db_connects[$key];
-      $dsn = $medoo->info()['dsn'];
-      $pdo = $medoo ->pdo;  
-      if($only[$key]){
-        $commits[] = $pdo;
-        $pdo->beginTransaction();
-        db_active($key);
-      } 
-      $call();
-    } 
-    foreach($commits as $pdo) {
-      $pdo->commit();
+*/
+function xa_db_action($key_call = [])
+{
+    global $_db_connects;
+    global $_db_thor_err;
+    $_db_thor_err = true;
+    $find_err = false;
+    $commits = [];
+    $active_dsn = [];
+    $only = [];
+    foreach($key_call as $key => $call) {
+        $medoo = $_db_connects[$key];
+        $dsn = $medoo->info()['dsn'];
+        if(!$active_dsn[$dsn]) {
+            $active_dsn[$dsn] = $key;
+            $only[$key] = true;
+        }
+        $pdo = $medoo->pdo;
+        if(!is_object($pdo)) {
+            throw new Exception("未知的数据库" . $key);
+        }
     }
-    $flag = true;
-  } catch (Exception $e) {
-    foreach($commits as $pdo) {
-      $pdo->rollBack();
-    }  
-    $_db_thor_err = false;
-    $flag = false;
-  }
-  db_active('default');
-  return $flag;
+    try {
+        foreach($key_call as $key => $call) {
+            $medoo = $_db_connects[$key];
+            $dsn = $medoo->info()['dsn'];
+            $pdo = $medoo ->pdo;
+            if($only[$key]) {
+                $commits[] = $pdo;
+                $pdo->beginTransaction();
+                db_active($key);
+            }
+            $call();
+        }
+        foreach($commits as $pdo) {
+            $pdo->commit();
+        }
+        $flag = true;
+    } catch (Exception $e) {
+        foreach($commits as $pdo) {
+            $pdo->rollBack();
+        }
+        $_db_thor_err = false;
+        $flag = false;
+    }
+    db_active('default');
+    return $flag;
 }
 
 
@@ -1209,31 +1243,32 @@ db_struct_table_range_auto('wordpress','my_table',[
 ]);
 
 */
-function db_struct_table_range_auto($db_name,$table,$year_month = [],$datetime_field = 'created_at',$name='p'){
-    $all = db_struct_show_range($db_name,$table);
-    sort($year_month); 
-    if($all){
+function db_struct_table_range_auto($db_name, $table, $year_month = [], $datetime_field = 'created_at', $name = 'p')
+{
+    $all = db_struct_show_range($db_name, $table);
+    sort($year_month);
+    if($all) {
         $list = [];
         $last = '';
-        foreach($all as $v){
-            $k = str_replace($name,'',$v); 
+        foreach($all as $v) {
+            $k = str_replace($name, '', $v);
             $list[$k] = true;
             $last = $k;
-        } 
-        foreach($year_month as $k=>$v){
-            $a = date("Ym",strtotime($v));
-            if($list[$a]){
+        }
+        foreach($year_month as $k => $v) {
+            $a = date("Ym", strtotime($v));
+            if($list[$a]) {
                 unset($year_month[$k]);
             }
-            if($last >= $a){
+            if($last >= $a) {
                 unset($year_month[$k]);
             }
         }
     }
-    if(!$year_month){
+    if(!$year_month) {
         return false;
     }
-    return db_struct_table_range($table,$year_month,$datetime_field,$name);
+    return db_struct_table_range($table, $year_month, $datetime_field, $name);
 }
 /**
 * 创建分区表，内部调用
@@ -1244,32 +1279,33 @@ db_struct_table_range('my_table',[
 ],'created_at','p',false);
 
 */
-function db_struct_table_range($table,$year_month = [],$datetime_field = 'created_at',$name='p',$return_sql = false){
+function db_struct_table_range($table, $year_month = [], $datetime_field = 'created_at', $name = 'p', $return_sql = false)
+{
     $table = addslashes($table);
     $next = '';
-    foreach($year_month as $v){
-        $a = date("Ym",strtotime($v));
-        $b = date("Y-m-01",strtotime("+1 month",strtotime($v)));
-        $next .= "PARTITION ".$name.$a." VALUES LESS THAN ('".$b."'),";
+    foreach($year_month as $v) {
+        $a = date("Ym", strtotime($v));
+        $b = date("Y-m-01", strtotime("+1 month", strtotime($v)));
+        $next .= "PARTITION " . $name . $a . " VALUES LESS THAN ('" . $b . "'),";
     }
-    $next = substr($next,0,-1);
+    $next = substr($next, 0, -1);
     $table_info = db_show_create_table($table);
-    if(strpos($table_info,'PARTITION') === false){
+    if(strpos($table_info, 'PARTITION') === false) {
         $sql = " 
             ALTER TABLE `$table` 
             PARTITION BY RANGE COLUMNS($datetime_field) (
-              ".$next."
+              " . $next . "
             );
-        "; 
-    }else {
+        ";
+    } else {
         $sql = " 
             ALTER TABLE `$table` 
             ADD PARTITION (
-              ".$next."
+              " . $next . "
             );
-        "; 
-    }  
-    if($return_sql){
+        ";
+    }
+    if($return_sql) {
         return $sql;
     }
     return db_query($sql);
@@ -1277,37 +1313,40 @@ function db_struct_table_range($table,$year_month = [],$datetime_field = 'create
 /**
 * 分区表名称
 */
-function db_struct_show_range($db_name = '',$table = ''){
+function db_struct_show_range($db_name = '', $table = '')
+{
     $db_name = addslashes($db_name);
     $table   = addslashes($table);
-    $sql = "SELECT * FROM information_schema.PARTITIONS WHERE TABLE_SCHEMA = '".$db_name."' AND TABLE_NAME = '".$table."'"; 
-    $res = db_query($sql,[]);
-    foreach($res as $v){
+    $sql = "SELECT * FROM information_schema.PARTITIONS WHERE TABLE_SCHEMA = '" . $db_name . "' AND TABLE_NAME = '" . $table . "'";
+    $res = db_query($sql, []);
+    foreach($res as $v) {
         $p[] = $v['PARTITION_NAME'];
     }
     return $p;
-}  
+}
 /**
 * 删除某个分区表
 * 删除后分区数据也会一起删除
-*/ 
-function drop_struct_range($table,$p){
+*/
+function drop_struct_range($table, $p)
+{
     $table = addslashes($table);
     $p     = addslashes($p);
-    $sql = "ALTER TABLE `$table` DROP PARTITION ".$p;
+    $sql = "ALTER TABLE `$table` DROP PARTITION " . $p;
     return db_query($sql);
 }
 /**
 * 显示create table语句
 */
-function db_show_create_table($table,$return_val = true){
+function db_show_create_table($table, $return_val = true)
+{
     $table = addslashes($table);
-    $sql = 'SHOW CREATE TABLE `'.$table.'` ';
-    $res = db_query($sql,[])[0];
+    $sql = 'SHOW CREATE TABLE `' . $table . '` ';
+    $res = db_query($sql, [])[0];
     $val = $res['Create Table'];
     $list[$res['Table']] = $val;
-    if($return_val){
+    if($return_val) {
         return $val;
     }
-    return $list; 
+    return $list;
 }

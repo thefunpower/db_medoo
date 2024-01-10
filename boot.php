@@ -1,3 +1,4 @@
-<?php 
+<?php
 
-include __DIR__ .'/inc/db/boot.php';
+
+include __DIR__ . '/inc/db/boot.php';
