@@ -239,6 +239,10 @@ class model{
 			$where['LIMIT'] = $limit;
 		}  
 		$this->before_find($where);
+		$select = "*";
+		if($where && is_array($where)){
+			$select = $where['select']?:"*";	
+		}		
 		$ln = $this->field_ln; 
 		if($use_select){
 			foreach($where as $k=>$v){ 
@@ -271,14 +275,14 @@ class model{
 			if($use_select){
 				$res = $this->select($where); 
 			}else{
-				$res = db_get_one($this->table,"*",$where);
+				$res = db_get_one($this->table,$select,$where);
 			}
 			$this->after_find($res);
 		}else{		
 			if($use_select){
 				$res = $this->select($where); 
 			}else{
-				$res = db_get($this->table,"*",$where);		
+				$res = db_get($this->table,$select,$where);		
 			} 
 			foreach($res as &$v){
 				$this->after_find($v);
