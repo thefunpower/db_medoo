@@ -243,6 +243,11 @@ class model
     */
     public function find($where = '', $limit = '', $use_select = false)
     {
+        $select = "*";
+        if($where && is_array($where)) {
+            $select = $where['select'] ?: "*";
+            unset($where['select']);
+        }
         if(!is_array($where) && $where) {
             $limit = 1;
         }
@@ -251,10 +256,6 @@ class model
             $where['LIMIT'] = $limit;
         }
         $this->before_find($where);
-        $select = "*";
-        if($where && is_array($where)) {
-            $select = $where['select'] ?: "*";
-        }
         $ln = $this->field_ln;
         if($use_select) {
             foreach($where as $k => $v) {
