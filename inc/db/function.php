@@ -26,6 +26,7 @@ global $_db_par;
 * 错误信息
 */
 global $_db_error;
+global $_db_active_lock_name;
 /**
  * 激活平台数据库连接，平台数据库不支持从库读
  */
@@ -51,11 +52,26 @@ function db_active_default()
 /**
  * 激活当前使用哪个数据库
  */
-function db_active($name = 'default')
+function db_active($name = 'default',$is_lock = false)
 {
     global $_db_active;
     $_db_active  = $name;
+    global $_db_active_lock_name;
+    if($is_lock){
+        $_db_active_lock_name = $name;
+    }
 }
+
+/**
+* 回到上一个连接
+*/
+function db_active_rollback(){
+    global $_db_active_lock_name;
+    if($_db_active_lock_name){
+        db_active($_db_active_lock_name);
+    }
+}
+
 /**
 * 获取当前启用的数据库连接
 */
