@@ -52,12 +52,12 @@ function db_active_default()
 /**
  * 激活当前使用哪个数据库
  */
-function db_active($name = 'default',$is_lock = false)
+function db_active($name = 'default',$need_rollback_here = false)
 {
     global $_db_active;
     $_db_active  = $name;
     global $_db_active_lock_name;
-    if($is_lock){
+    if($need_rollback_here){
         $_db_active_lock_name = $name;
     }
 }

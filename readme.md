@@ -613,6 +613,26 @@ $sql = create_db_compare_sql([
 
 其中`$is_like`表示是否是`like`效果。
 
+## 回到上一个连接
+
+在SAAS平台开发时，存在数据库切换的情况。
+
+
+~~~
+db_active('default',true);
+//这里操作数据库
+db_active('main');
+//这里操作数据库
+
+//这时会回到default连接
+db_active_rollback();
+~~~
+
+关键函数
+
+~~~
+db_active($name = 'default',$need_rollback_here = false)
+~~~
 
 ## License
 
