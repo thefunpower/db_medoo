@@ -162,7 +162,13 @@ class model
     public function pager($join, $columns = null, $where = null)
     {
         $this->_where($where);
-        return db_pager($this->table, $join, $columns, $where);
+        $all =  db_pager($this->table, $join, $columns, $where);
+        if($all['data']){
+            foreach($all['data'] as &$v){
+                $this->after_find($v);
+            }
+        }
+        return $all;
     }
     /**
     * SUM
