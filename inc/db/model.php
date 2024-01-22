@@ -157,6 +157,19 @@ class model
         return $id;
     }
     /**
+    * 批量写入数据
+    */
+    public function inserts($data)
+    {
+        $new_data = [];
+        foreach($data as &$v){
+            $this->before_insert($data);
+            $new_data[] = db_allow($this->table, $v);
+        } 
+        $id = db_insert($this->table, $new_data); 
+        return $id;
+    }
+    /**
     * 分页
     */
     public function pager($join, $columns = null, $where = null)
