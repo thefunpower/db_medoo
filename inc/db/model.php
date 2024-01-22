@@ -162,12 +162,15 @@ class model
     public function inserts($data)
     {
         $new_data = [];
-        foreach($data as &$v){
-            $this->before_insert($data);
+        foreach($data as &$v) {
+            $this->before_insert($v);
             $new_data[] = db_allow($this->table, $v);
-        } 
-        $id = db_insert($this->table, $new_data); 
-        return $id;
+        }
+        if(!$new_data) {
+            return false;
+        }
+        db()->insert($this->table, $new_data);
+        return true;
     }
     /**
     * 分页
@@ -176,8 +179,8 @@ class model
     {
         $this->_where($where);
         $all =  db_pager($this->table, $join, $columns, $where);
-        if($all['data']){
-            foreach($all['data'] as &$v){
+        if($all['data']) {
+            foreach($all['data'] as &$v) {
                 $this->after_find($v);
             }
         }
