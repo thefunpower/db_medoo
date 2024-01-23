@@ -169,12 +169,13 @@ function medoo_db()
 {
     global $_db_connects,$_db_active;
     $db_connect =  $_db_connects[$_db_active];
+    $err = '数据库链接异常，如有疑问请联系管理员。';
     if(!$db_connect) {
         if(function_exists('do_action')) {
-            do_action('db.err');
+            do_action('db.err', $err);
         } else {
             header('Content-Type: text/html; charset=utf-8');
-            exit("数据库链接异常，如有疑问请联系管理员。");
+            exit($err);
         }
     } else {
         return $db_connect;
@@ -299,6 +300,9 @@ function db_add_error($str)
         throw new Exception($str);
     }
     $_db_error[] = $str;
+    if(function_exists('do_action')) {
+        do_action('db.err', $_db_error);
+    }
 }
 /**
 * 获取错误信息

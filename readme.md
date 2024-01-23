@@ -648,6 +648,13 @@ db_prefix('');
 db_prefix();
 ~~~
 
+## 统一数据库错误处理
+~~~
+add_action('db.err',function($err){
+    //如果是字符串说明是链接失败，如果是数组说明是SQL错误
+});
+~~~
+
 ## License
 
 [Apache License 2.0](LICENSE)
