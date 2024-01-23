@@ -63,7 +63,11 @@ function db_prefix($prefix = null)
 function get_db_table_name($table)
 {
     global $db_prefix;
-    return $db_prefix . $table;
+    $table = $db_prefix . $table;
+    if(function_exists('do_action')) {
+        do_action("db.table",$table);
+    }
+    return $table;
 }
 
 /**

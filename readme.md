@@ -648,6 +648,12 @@ db_prefix('');
 db_prefix();
 ~~~
 
+如果因为设置前缀导致有些表查寻有问题，可用`add_action`
+
+~~~
+add_action("db.table",function(&$table){});
+~~~
+
 ## 统一数据库错误处理
 ~~~
 add_action('db.err',function($err){
