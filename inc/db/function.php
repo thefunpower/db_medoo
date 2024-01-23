@@ -2,7 +2,7 @@
 /**
 *  对数据库操作的封装
 *  https://medoo.in/api/where
-*/  
+*/
 /**
 * 数据库对象
 * 建议使用 medoo_db()
@@ -24,7 +24,7 @@ global $_db_active_lock_name;
 /**
 * 表前缀
 */
-global $db_prefix = '';
+global $db_prefix;
 /**
  * 激活平台数据库连接，平台数据库不支持从库读
  */
@@ -49,30 +49,32 @@ function db_active_default()
 /**
 * 表前缀
 */
-function db_prefix($prefix = null){
+function db_prefix($prefix = null)
+{
     global $db_prefix;
-    if($prefix === null){
+    if($prefix === null) {
         return $db_prefix;
     }
     $db_prefix = $prefix;
-} 
+}
 /**
 * 表名
 */
-function get_db_table_name($table){
+function get_db_table_name($table)
+{
     global $db_prefix;
-    return $db_prefix.$table;
+    return $db_prefix . $table;
 }
 
 /**
  * 激活当前使用哪个数据库
  */
-function db_active($name = 'default',$need_rollback_here = false)
+function db_active($name = 'default', $need_rollback_here = false)
 {
     global $_db_active;
     $_db_active  = $name;
     global $_db_active_lock_name;
-    if($need_rollback_here){
+    if($need_rollback_here) {
         $_db_active_lock_name = $name;
     }
 }
@@ -80,9 +82,10 @@ function db_active($name = 'default',$need_rollback_here = false)
 /**
 * 回到上一个连接
 */
-function db_active_rollback(){
+function db_active_rollback()
+{
     global $_db_active_lock_name;
-    if($_db_active_lock_name){
+    if($_db_active_lock_name) {
         db_active($_db_active_lock_name);
     }
 }
@@ -167,9 +170,9 @@ function medoo_db()
     global $_db_connects,$_db_active;
     $db_connect =  $_db_connects[$_db_active];
     if(!$db_connect) {
-        if(function_exists('do_action')){
+        if(function_exists('do_action')) {
             do_action('db.err');
-        }else{ 
+        } else {
             header('Content-Type: text/html; charset=utf-8');
             exit("数据库链接异常，如有疑问请联系管理员。");
         }
@@ -184,7 +187,7 @@ if(!function_exists('db')) {
     }
 }
 /***
- * 分页查寻  
+ * 分页查寻
  * @param string $table 表名
  * @param string $column 字段
  * @param array $where  条件 [LIMIT=>1]
@@ -208,7 +211,7 @@ function db_pager($table, $join, $columns = null, $where = null)
         $count   = db_pager_count() ?: db_get_count($table, $where);
     } elseif ($join && $where) {
         $flag    = false;
-        $count   = db_pager_count() ?: db_get_count($table, $join, get_db_table_name($table).".id", $where);
+        $count   = db_pager_count() ?: db_get_count($table, $join, get_db_table_name($table) . ".id", $where);
     }
     if($where && is_string($where)) {
         $where = [];
