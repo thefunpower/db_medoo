@@ -634,6 +634,20 @@ db_active_rollback();
 db_active($name = 'default',$need_rollback_here = false)
 ~~~
 
+## 表前缀
+
+设置表前缀
+
+~~~
+db_prefix('wp_');
+db_prefix('');
+~~~
+
+获取表前缀
+~~~
+db_prefix();
+~~~
+
 ## License
 
 [Apache License 2.0](LICENSE)

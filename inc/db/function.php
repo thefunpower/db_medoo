@@ -2,16 +2,7 @@
 /**
 *  对数据库操作的封装
 *  https://medoo.in/api/where
-*/
-/**
-复杂的查寻，(...  AND ...) OR (...  AND ...)
-"OR #1" => [
-    "AND #2" => $where,
-    "AND #3" => $or_where
-    ]
-];
-
- */
+*/  
 /**
 * 数据库对象
 * 建议使用 medoo_db()
@@ -26,7 +17,14 @@ global $_db_par;
 * 错误信息
 */
 global $_db_error;
+/**
+* 当前激活数据库名
+*/
 global $_db_active_lock_name;
+/**
+* 表前缀
+*/
+global $db_prefix = '';
 /**
  * 激活平台数据库连接，平台数据库不支持从库读
  */
@@ -47,6 +45,23 @@ function db_active_read()
 function db_active_default()
 {
     db_active('default');
+}
+/**
+* 表前缀
+*/
+function db_prefix($prefix = null){
+    global $db_prefix;
+    if($prefix === null){
+        return $db_prefix;
+    }
+    $db_prefix = $prefix;
+} 
+/**
+* 表名
+*/
+function get_db_table_name($table){
+    global $db_prefix;
+    return $db_prefix.$table;
 }
 
 /**
@@ -152,7 +167,12 @@ function medoo_db()
     global $_db_connects,$_db_active;
     $db_connect =  $_db_connects[$_db_active];
     if(!$db_connect) {
-        exit("Lost connect");
+        if(function_exists('do_action')){
+            do_action('db.err');
+        }else{ 
+            header('Content-Type: text/html; charset=utf-8');
+            exit("数据库链接异常，如有疑问请联系管理员。");
+        }
     } else {
         return $db_connect;
     }
@@ -164,37 +184,7 @@ if(!function_exists('db')) {
     }
 }
 /***
- * 分页查寻
- JOIN
- $where = [
-    //"do_order.id"=>1,
-    'ORDER'=>[
-        'do_order.id'=>'DESC'
-    ]
-];
-
-int date
-$where['printer_refund_apply.created_at[<>]']  = [
- $dates[0] / 1000, $dates[1] / 1000
-];
-datetime
-$where['printer_refund_apply.created_at[<>]']  = [
- date('Y-m-d H:i:s',$dates[0] / 1000), date('Y-m-d H:i:s',$dates[1] / 1000)
-];
-
-$data = db_pager("do_order",
-    ["[><]do_mini_user" => ["uid" => "id"]],
-    [
-        "do_order.id",
-        "do_order.uid",
-        "user" => [
-            "do_mini_user.nickName",
-            "do_mini_user.avatarUrl",
-            "do_mini_user.openid",
-        ]
-    ],
-    $where);
-
+ * 分页查寻  
  * @param string $table 表名
  * @param string $column 字段
  * @param array $where  条件 [LIMIT=>1]
@@ -218,7 +208,7 @@ function db_pager($table, $join, $columns = null, $where = null)
         $count   = db_pager_count() ?: db_get_count($table, $where);
     } elseif ($join && $where) {
         $flag    = false;
-        $count   = db_pager_count() ?: db_get_count($table, $join, "$table.id", $where);
+        $count   = db_pager_count() ?: db_get_count($table, $join, get_db_table_name($table).".id", $where);
     }
     if($where && is_string($where)) {
         $where = [];
@@ -365,7 +355,7 @@ function db_get($table, $join = null, $columns = null, $where = null)
     if (is_string($columns) && strpos($columns, 'WHERE') !== false) {
         $columns = db_raw($columns);
     }
-    $all =  medoo_db()->select($table, $join, $columns, $where);
+    $all =  medoo_db()->select(get_db_table_name($table), $join, $columns, $where);
     if($all) {
         foreach($all as &$v) {
             db_row_json_to_array($table, $v);
@@ -438,7 +428,7 @@ function db_insert($table, $data = [], $don_run_action = false)
             $data[$k] = $v;
         }
     }
-    $_db    = medoo_db()->insert($table, $data);
+    $_db    = medoo_db()->insert(get_db_table_name($table), $data);
     $id = medoo_db()->id();
     //写入数据后
     $action_data = [];
@@ -500,7 +490,7 @@ function db_update($table, $data = [], $where = [], $don_run_action = false)
             $data[$k] = $v;
         }
     }
-    $_db    = medoo_db()->update($table, $data, $where);
+    $_db    = medoo_db()->update(get_db_table_name($table), $data, $where);
     $error = medoo_db()->error;
     if ($error) {
         throw new Exception($error);
@@ -617,7 +607,7 @@ function db_query($sql, $raw = null)
 function db_get_min($table, $join  = "*", $column = null, $where = null)
 {
     do_action("db_table.$table", $table);
-    return medoo_db()->min($table, $join, $column, $where);
+    return medoo_db()->min(get_db_table_name($table), $join, $column, $where);
 }
 
 /**
@@ -632,7 +622,7 @@ function db_get_min($table, $join  = "*", $column = null, $where = null)
 function db_get_max($table, $join =  "*", $column = null, $where = null)
 {
     do_action("db_table.$table", $table);
-    return medoo_db()->max($table, $join, $column, $where);
+    return medoo_db()->max(get_db_table_name($table), $join, $column, $where);
 }
 
 /**
@@ -646,7 +636,7 @@ function db_get_max($table, $join =  "*", $column = null, $where = null)
 function db_get_count($table, $join =  "*", $column = null, $where = null)
 {
     do_action("db_table.$table", $table);
-    return medoo_db()->count($table, $join, $column, $where) ?: 0;
+    return medoo_db()->count(get_db_table_name($table), $join, $column, $where) ?: 0;
 }
 
 /**
@@ -660,7 +650,7 @@ function db_get_count($table, $join =  "*", $column = null, $where = null)
 function db_get_has($table, $join = null, $where = null)
 {
     do_action("db_table.$table", $table);
-    return medoo_db()->has($table, $join, $where);
+    return medoo_db()->has(get_db_table_name($table), $join, $where);
 }
 
 /**
@@ -675,7 +665,7 @@ function db_get_has($table, $join = null, $where = null)
 function db_get_rand($table, $join = "*", $column = null, $where = null)
 {
     do_action("db_table.$table", $table);
-    return medoo_db()->rand($table, $join, $column, $where);
+    return medoo_db()->rand(get_db_table_name($table), $join, $column, $where);
 }
 
 /**
@@ -690,7 +680,7 @@ function db_get_rand($table, $join = "*", $column = null, $where = null)
 function db_get_sum($table, $join = "*", $column = null, $where = null)
 {
     do_action("db_table.$table", $table);
-    return medoo_db()->sum($table, $join, $column, $where) ?: 0;
+    return medoo_db()->sum(get_db_table_name($table), $join, $column, $where) ?: 0;
 }
 
 /**
@@ -705,7 +695,7 @@ function db_get_sum($table, $join = "*", $column = null, $where = null)
 function db_get_avg($table, $join = "*", $column = null, $where = null)
 {
     do_action("db_table.$table", $table);
-    return medoo_db()->avg($table, $join, $column, $where);
+    return medoo_db()->avg(get_db_table_name($table), $join, $column, $where);
 }
 
 /**
@@ -730,7 +720,7 @@ function db_del($table, $where)
     if(db_can_run_action()) {
         do_action("db_insert.$table.del", $where);
     }
-    $data = medoo_db()->delete($table, $where);
+    $data = medoo_db()->delete(get_db_table_name($table), $where);
     return $data->rowCount();
 }
 
@@ -749,6 +739,7 @@ function db_delete($table, $where)
  */
 function show_tables($table)
 {
+    $table = get_db_table_name($table);
     $sql = "SHOW TABLES LIKE '%$table%';";
     $all = medoo_db()->query($sql);
     foreach ($all as $v) {
@@ -763,6 +754,7 @@ function show_tables($table)
  */
 function get_table_fields($table, $has_key  = true)
 {
+    $table = get_db_table_name($table);
     $sql   = "SHOW FULL FIELDS FROM `" . $table . "`";
     $lists = medoo_db()->query($sql);
     $arr   = [];
@@ -781,6 +773,7 @@ function get_table_fields($table, $has_key  = true)
 function db_allow($table, $data)
 {
     do_action("db_table.$table", $table);
+    $table = get_db_table_name($table);
     $fields = get_table_fields($table);
     foreach ($data as $k => $v) {
         if (!$fields[$k]) {
@@ -829,6 +822,7 @@ function database_tables($name = null, $show_markdown = false)
  */
 function get_table_field_json($table)
 {
+    $table = get_db_table_name($table);
     static $table_fields;
     if(!isset($table_fields[$table])) {
         $all = get_table_fields($table);
@@ -847,6 +841,7 @@ function get_table_field_json($table)
  */
 function get_table_field_is_json($table, $field)
 {
+    $table = get_db_table_name($table);
     $table_fields = get_table_field_json($table);
     if(isset($table_fields[$field])) {
         return true;
@@ -862,6 +857,7 @@ function get_table_field_is_json($table, $field)
 */
 function db_row_json_to_array($table_name, &$row_data = [])
 {
+    $table_name = get_db_table_name($table_name);
     if(is_array($row_data)) {
         foreach ($row_data as $key => $val) {
             if(is_string($val) && get_table_field_is_json($table_name, $key)) {
