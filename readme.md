@@ -675,6 +675,13 @@ $model->array_to_tree($new_list, $pk = 'id', $pid = 'pid', $child = 'children', 
 $model->get_tree_up($id, $is_frist = false)
 ~~~
 
+向下递归
+
+~~~
+$model->get_tree_id($id, $where = [], $get_field = 'id')
+~~~
+
+
 
 ## License
 
