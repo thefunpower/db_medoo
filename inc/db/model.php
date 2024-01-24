@@ -133,37 +133,47 @@ class model
     /**
     * 更新数据
     */
-    public function update($data, $where = '')
+    public function update($data, $where = '', $ignore_before_after = false)
     {
         if(!$where) {
             return false;
         }
         $this->_where($where);
-        $this->before_update($data, $where);
+        if(!$ignore_before_after) {
+            $this->before_update($data, $where);
+        }
         $data_db = db_allow($this->table, $data);
         $row_count = db_update($this->table, $data_db, $where);
-        $this->after_update($row_count, $data, $where);
+        if(!$ignore_before_after) {
+            $this->after_update($row_count, $data, $where);
+        }
         return $row_count;
     }
     /**
     * 写入数据
     */
-    public function insert($data)
+    public function insert($data, $ignore_before_after = false)
     {
-        $this->before_insert($data);
+        if(!$ignore_before_after) {
+            $this->before_insert($data);
+        }
         $data_db = db_allow($this->table, $data);
         $id = db_insert($this->table, $data_db);
-        $this->after_insert($id);
+        if(!$ignore_before_after) {
+            $this->after_insert($id);
+        }
         return $id;
     }
     /**
     * 批量写入数据
     */
-    public function inserts($data)
+    public function inserts($data, $ignore_before_after = false)
     {
         $new_data = [];
         foreach($data as &$v) {
-            $this->before_insert($v);
+            if(!$ignore_before_after) {
+                $this->before_insert($v);
+            }
             $new_data[] = db_allow($this->table, $v);
         }
         if(!$new_data) {
@@ -229,12 +239,16 @@ class model
     /**
     * DEL
     */
-    public function del($where = '')
+    public function del($where = '', $ignore_before_after = false)
     {
         $this->_where($where);
-        $this->before_del($where);
+        if(!$ignore_before_after) {
+            $this->before_del($where);
+        }
         $res = db_del($this->table, $where);
-        $this->after_del($where);
+        if(!$ignore_before_after) {
+            $this->after_del($where);
+        }
         return $res;
     }
     /**
