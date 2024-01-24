@@ -351,4 +351,91 @@ class model
             }
         }
     }
+
+    /**
+    * 向上取递归
+    * 如当前分类是3，将返回 123所有的值
+    * $arr = get_tree_up($v['catalog_id'],true);
+    * foreach($arr as $vv){
+    *   $title[] = $vv['title'];
+    * }
+    * id pid
+    * 1  0
+    * 2  1
+    * 3  2
+    */
+    public function get_tree_up($id, $is_frist = false)
+    {
+        static $_data;
+        if($is_frist) {
+            $_data = [];
+        }
+        $end = $this->find(['id' => $id], 1);
+        $_data[] = $end;
+        if($end['pid'] > 0) {
+            $this->get_tree_up($end['pid']);
+        }
+        return array_reverse($_data);
+    }
+    /**
+    * 递归删除
+    */
+    public function tree_del($id, $where = [])
+    {
+        $catalog = $this->find($where);
+        $all = array_to_tree($catalog, $pk = 'id', $pid = 'pid', $child = 'children', $id);
+        $where['id'] = $id;
+        $cur = $this->find($where, 1);
+        $this->delete(['id' => $id]);
+        $this->_loop_del_tree($table, $all);
+    }
+    /**
+     * 数组转成tree
+     */
+    public function array_to_tree($new_list, $pk = 'id', $pid = 'pid', $child = 'children', $root = 0, $my_id = '')
+    {
+        $list = array_to_tree($new_list, $pk, $pid, $child, $root, $my_id);
+        $list = array_values($list);
+        return $list;
+    }
+    /**
+    * 向下递归
+    */
+    public function get_tree_id($id, $where = [], $get_field = 'id')
+    {
+        $list = $this->find($where);
+        $tree = array_to_tree($list, $pk = 'id', $pid = 'pid', $child = 'children', $id);
+        $tree[] = $this->find(['id' => $id], 1);
+        $all = $this->_loop_tree_deep_inner($tree, $get_field, $is_frist = true);
+        return $all;
+    }
+    /**
+    * 内部实现
+    */
+    public function _loop_del_tree($list)
+    {
+        foreach($list as $v) {
+            $this->delete(['id' => $v['id']]);
+            if($v['children']) {
+                $this->_loop_del_tree($v['children']);
+            }
+        }
+    }
+    /**
+    * 内部实现
+    */
+    public function _loop_tree_deep_inner($all, $get_field, $is_frist = false)
+    {
+        static $_data;
+        if($is_frist) {
+            $_data = [];
+        }
+        foreach($all as $v) {
+            $_data[] = $v[$get_field];
+            if($v['children']) {
+                $this->_loop_tree_deep_inner($v['children'], $get_field);
+            }
+        }
+        return $_data;
+    }
 }
