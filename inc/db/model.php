@@ -400,7 +400,6 @@ class model
             $catalog = $this->find($where);
         }
         $all = array_to_tree($catalog, $pk = 'id', $pid = 'pid', $child = 'children', $id);
-        $where['id'] = $id;
         if($id) {
             $this->delete(['id' => $id]);
         }
