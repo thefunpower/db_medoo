@@ -380,14 +380,19 @@ class model
     /**
     * 递归删除
     */
-    public function tree_del($id, $where = [])
+    public function tree_del($id = '', $where = [])
     {
-        $catalog = $this->find($where);
+        if($where) {
+            $catalog = $this->find($where);
+        }
         $all = array_to_tree($catalog, $pk = 'id', $pid = 'pid', $child = 'children', $id);
         $where['id'] = $id;
-        $cur = $this->find($where, 1);
-        $this->delete(['id' => $id]);
-        $this->_loop_del_tree($table, $all);
+        if($id) {
+            $this->delete(['id' => $id]);
+        }
+        if($all) {
+            $this->_loop_del_tree($all);
+        }
     }
     /**
      * 数组转成tree

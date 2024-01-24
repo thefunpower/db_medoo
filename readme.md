@@ -661,6 +661,21 @@ add_action('db.err',function($err){
 });
 ~~~
 
+## model tree
+
+数组转成tree
+
+~~~
+$model->array_to_tree($new_list, $pk = 'id', $pid = 'pid', $child = 'children', $root = 0, $my_id = '')
+~~~
+
+向上取递归
+
+~~~
+$model->get_tree_up($id, $is_frist = false)
+~~~
+
+
 ## License
 
 [Apache License 2.0](LICENSE)
