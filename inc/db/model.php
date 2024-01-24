@@ -5,7 +5,7 @@ class model
 {
     protected $table   = '';
     protected $primary = 'id';
-
+    public static $_find_by_id;
     protected $field = [];
     protected $validate_add = [];
     protected $validate_edit = [];
@@ -266,6 +266,19 @@ class model
     public function find_one($where = '')
     {
         return $this->find($where, 1);
+    }
+    /**
+     * 根据ID查寻
+     */
+    public function find_by_id($id)
+    {
+        $data = self::$_find_by_id[$id];
+        if($data) {
+            return $data;
+        } else {
+            self::$_find_by_id[$id] = $data = $this->find_one($id);
+            return $data;
+        }
     }
     /**
     * 查寻多条记录
