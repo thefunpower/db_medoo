@@ -154,6 +154,9 @@ class model
     public function f_update($data, $where = '')
     {
         $data_db = db_allow($this->table, $data);
+        if(!is_array($where)) {
+            $where = ['id' => $id];
+        }
         return db_update($this->table, $data_db, $where);
 
     }
