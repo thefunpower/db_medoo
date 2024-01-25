@@ -35,7 +35,11 @@ class model
     /**
     * 查寻后
     */
-    public function after_find(&$data)
+    public function after_find(&$data) {}
+    /**
+    * 查寻后
+    */
+    public function after_find_inner(&$data)
     {
         $ln = $this->field_ln;
         if($ln) {
@@ -133,18 +137,18 @@ class model
     /**
     * 更新数据
     */
-    public function update($data, $where = '', $ignore_before_after = false)
+    public function update($data, $where = '', $ignore_hook = false)
     {
         if(!$where) {
             return false;
         }
         $this->_where($where);
-        if(!$ignore_before_after) {
+        if(!$ignore_hook) {
             $this->before_update($data, $where);
         }
         $data_db = db_allow($this->table, $data);
         $row_count = db_update($this->table, $data_db, $where);
-        if(!$ignore_before_after) {
+        if(!$ignore_hook) {
             $this->after_update($row_count, $data, $where);
         }
         return $row_count;
@@ -152,14 +156,14 @@ class model
     /**
     * 写入数据
     */
-    public function insert($data, $ignore_before_after = false)
+    public function insert($data, $ignore_hook = false)
     {
-        if(!$ignore_before_after) {
+        if(!$ignore_hook) {
             $this->before_insert($data);
         }
         $data_db = db_allow($this->table, $data);
         $id = db_insert($this->table, $data_db);
-        if(!$ignore_before_after) {
+        if(!$ignore_hook) {
             $this->after_insert($id);
         }
         return $id;
@@ -167,11 +171,11 @@ class model
     /**
     * 批量写入数据
     */
-    public function inserts($data, $ignore_before_after = false)
+    public function inserts($data, $ignore_hook = false)
     {
         $new_data = [];
         foreach($data as &$v) {
-            if(!$ignore_before_after) {
+            if(!$ignore_hook) {
                 $this->before_insert($v);
             }
             $new_data[] = db_allow($this->table, $v);
@@ -185,13 +189,15 @@ class model
     /**
     * 分页
     */
-    public function pager($join, $columns = null, $where = null)
+    public function pager($join, $columns = null, $where = null, $ignore_hook = false)
     {
         $this->_where($where);
         $all =  db_pager($this->table, $join, $columns, $where);
         if($all['data']) {
             foreach($all['data'] as &$v) {
-                $this->after_find($v);
+                if(!$ignore_hook) {
+                    $this->after_find($v);
+                }
             }
         }
         return $all;
@@ -239,14 +245,14 @@ class model
     /**
     * DEL
     */
-    public function del($where = '', $ignore_before_after = false)
+    public function del($where = '', $ignore_hook = false)
     {
         $this->_where($where);
-        if(!$ignore_before_after) {
+        if(!$ignore_hook) {
             $this->before_del($where);
         }
         $res = db_del($this->table, $where);
-        if(!$ignore_before_after) {
+        if(!$ignore_hook) {
             $this->after_del($where);
         }
         return $res;
@@ -263,34 +269,34 @@ class model
     /**
     * 查寻一条记录
     */
-    public function find_one($where = '')
+    public function find_one($where = '', $ignore_hook = false)
     {
-        return $this->find($where, 1);
+        return $this->find($where, 1, false, $ignore_hook);
     }
     /**
      * 根据ID查寻
      */
-    public function find_by_id($id)
+    public function find_by_id($id, $ignore_hook = false)
     {
         $data = self::$_find_by_id[$id];
         if($data) {
             return $data;
         } else {
-            self::$_find_by_id[$id] = $data = $this->find_one($id);
+            self::$_find_by_id[$id] = $data = $this->find_one($id, $ignore_hook = false);
             return $data;
         }
     }
     /**
     * 查寻多条记录
     */
-    public function find_all($where = '')
+    public function find_all($where = '', $ignore_hook = false)
     {
-        return $this->find($where);
+        return $this->find($where, '', false, $ignore_hook);
     }
     /**
     * 查寻记录
     */
-    public function find($where = '', $limit = '', $use_select = false)
+    public function find($where = '', $limit = '', $use_select = false, $ignore_hook = false)
     {
         $select = "*";
         if($where && is_array($where)) {
@@ -339,7 +345,10 @@ class model
             } else {
                 $res = db_get_one($this->table, $select, $where);
             }
-            $this->after_find($res);
+            $this->after_find_inner($res);
+            if(!$ignore_hook) {
+                $this->after_find($res);
+            }
         } else {
             if($use_select) {
                 $res = $this->select($where);
@@ -347,7 +356,10 @@ class model
                 $res = db_get($this->table, $select, $where);
             }
             foreach($res as &$v) {
-                $this->after_find($v);
+                $this->after_find_inner($res);
+                if(!$ignore_hook) {
+                    $this->after_find($v);
+                }
             }
         }
         return $res;
@@ -391,16 +403,16 @@ class model
     * 2  1
     * 3  2
     */
-    public function get_tree_up($id, $is_frist = false)
+    public function get_tree_up($id, $is_frist = true)
     {
         static $_data;
         if($is_frist) {
             $_data = [];
         }
-        $end = $this->find(['id' => $id], 1);
+        $end = $this->find(['id' => $id], 1, false, true);
         $_data[] = $end;
         if($end['pid'] > 0) {
-            $this->get_tree_up($end['pid']);
+            $this->get_tree_up($end['pid'], false);
         }
         return array_reverse($_data);
     }
@@ -410,7 +422,7 @@ class model
     public function tree_del($id = '', $where = [])
     {
         if($where) {
-            $catalog = $this->find($where);
+            $catalog = $this->find($where, '', false, true);
         }
         $all = array_to_tree($catalog, $pk = 'id', $pid = 'pid', $child = 'children', $id);
         if($id) {
@@ -434,9 +446,9 @@ class model
     */
     public function get_tree_id($id, $where = [], $get_field = 'id')
     {
-        $list = $this->find($where);
+        $list = $this->find($where, '', false, true);
         $tree = array_to_tree($list, $pk = 'id', $pid = 'pid', $child = 'children', $id);
-        $tree[] = $this->find(['id' => $id], 1);
+        $tree[] = $this->find(['id' => $id], 1, false, true);
         $all = $this->_loop_tree_deep_inner($tree, $get_field, $is_frist = true);
         return $all;
     }
