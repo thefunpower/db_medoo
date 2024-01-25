@@ -149,6 +149,15 @@ class model
     */
     public function after_del($where) {}
     /**
+     * 强制更新
+     */
+    public function f_update($data, $where = '')
+    {
+        $data_db = db_allow($this->table, $data);
+        return db_update($this->table, $data_db, $where);
+
+    }
+    /**
     * 更新数据
     */
     public function update($data, $where = '', $ignore_hook = false)
