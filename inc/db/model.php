@@ -10,6 +10,7 @@ class model
     protected $validate_add = [];
     protected $validate_edit = [];
     protected $unique_message = [];
+    protected $ignore_after_find_hook;
     /**
     * 字段映射 名字=>数据库中字段名
     * 仅支持find方法
@@ -27,6 +28,16 @@ class model
         \lib\Validate::lang($lang);
         $this->init();
     }
+    /**
+     * 取表名
+     */
+    public function get_table_name()
+    {
+        return $this->table;
+    }
+    /**
+     * INIT
+     */
     protected function init() {}
     /**
     * 查寻前
@@ -35,7 +46,10 @@ class model
     /**
     * 查寻后
     */
-    public function after_find(&$data) {}
+    public function after_find(&$data)
+    {
+        $this->ignore_after_find_hook[$this->table . $data['id']] = true;
+    }
     /**
     * 查寻后
     */
@@ -347,7 +361,9 @@ class model
             }
             $this->after_find_inner($res);
             if(!$ignore_hook) {
-                $this->after_find($res);
+                if(is_array($res) && !$this->ignore_after_find_hook[$this->table . $res['id']]) {
+                    $this->after_find($res);
+                }
             }
         } else {
             if($use_select) {
@@ -358,7 +374,9 @@ class model
             foreach($res as &$v) {
                 $this->after_find_inner($res);
                 if(!$ignore_hook) {
-                    $this->after_find($v);
+                    if(is_array($v) && !$this->ignore_after_find_hook[$this->table . $v['id']]) {
+                        $this->after_find($v);
+                    }
                 }
             }
         }
