@@ -65,7 +65,7 @@ function get_db_table_name($table)
     global $db_prefix;
     $table = $db_prefix . $table;
     if(function_exists('do_action')) {
-        do_action("db.table",$table);
+        do_action("db.table", $table);
     }
     return $table;
 }
@@ -730,6 +730,12 @@ function db_del($table, $where)
     //删除数据前
     if(db_can_run_action()) {
         do_action("db_insert.$table.del", $where);
+    }
+    if(!$where) {
+        return;
+    }
+    if(is_array($where) && !array_filter($where)) {
+        return;
     }
     $data = medoo_db()->delete(get_db_table_name($table), $where);
     return $data->rowCount();

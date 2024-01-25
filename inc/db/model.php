@@ -269,6 +269,13 @@ class model
         return db_get_avg($this->table, $filed, $where);
     }
     /**
+    * 删除数据
+    */
+    public function delete($where = '', $ignore_hook = false)
+    {
+        return $this->del($where, $ignore_hook);
+    }
+    /**
     * DEL
     */
     public function del($where = '', $ignore_hook = false)
