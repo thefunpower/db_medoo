@@ -681,7 +681,17 @@ $model->get_tree_up($id, $is_frist = false)
 $model->get_tree_id($id, $where = [], $get_field = 'id')
 ~~~
 
-
+## model分页复杂查寻
+~~~
+$where = [];
+$select = [];
+$where['GROUP'] = 'company_num';
+$select[] = 'customer_name';
+$select[] = 'company_num';
+$select['total'] = 'COUNT(`total_num`)';
+$select['amount'] = 'SUM(`total_price`)';
+$data = $this->invoice->pager($select, $where);
+~~~
 
 ## License
 
