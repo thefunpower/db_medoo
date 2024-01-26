@@ -696,6 +696,9 @@ $data = $this->invoice->pager($select, $where);
 GROUP BY 与 ORDER BY使用
 ~~~
 $wq = $this->input['wq'];
+$date = $this->input['date'];
+$date_start = $date[0];
+$date_end = $date[1];
 $where_string = "";
 $query = [];
 $where = [];
@@ -705,13 +708,21 @@ $select[] = 'company_num';
 $select[] = '@company_num';
 $select['total'] = 'COUNT(`total_num`)';
 $select['amount'] = 'SUM(`total_price`)';
-
+if($date_start) {
+    $where['created_at[>=]'] = $date_start . " 00:00:01";
+    $where_string .= " AND created_at >= :created_at ";
+    $query[':created_at'] = $date_start . " 00:00:01";
+}
+if($date_end) {
+    $where['created_at[<=]'] = $date_end . " 23:59:59";
+    $where_string .= " AND created_at <= :created_at_1 ";
+    $query[':created_at_1'] = $date_end . " 23:59:59";
+}
 if($wq) {
     $or['customer_name[~]'] = $wq;
     $or['company_num[~]'] = $wq;
     $where['OR'] = $or;
-    $where_string = " AND ";
-    $where_string .= " (customer_name LIKE :customer_name   OR company_num LIKE :company_num)";
+    $where_string .= " AND (customer_name LIKE :customer_name   OR company_num LIKE :company_num) ";
     $query[':customer_name'] = "%" . $wq . "%";
     $query[':company_num'] = "%" . $wq . "%";
 }
