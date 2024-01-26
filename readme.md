@@ -693,6 +693,37 @@ $select['amount'] = 'SUM(`total_price`)';
 $data = $this->invoice->pager($select, $where);
 ~~~
 
+GROUP BY 与 ORDER BY使用
+~~~
+$wq = $this->input['wq'];
+$where_string = "";
+$query = [];
+$where = [];
+$select = [];
+$select[] = 'customer_name';
+$select[] = 'company_num';
+$select[] = '@company_num';
+$select['total'] = 'COUNT(`total_num`)';
+$select['amount'] = 'SUM(`total_price`)';
+
+if($wq) {
+    $or['customer_name[~]'] = $wq;
+    $or['company_num[~]'] = $wq;
+    $where['OR'] = $or;
+    $where_string = " AND ";
+    $where_string .= " (customer_name LIKE :customer_name   OR company_num LIKE :company_num)";
+    $query[':customer_name'] = "%" . $wq . "%";
+    $query[':company_num'] = "%" . $wq . "%";
+}
+//有GROUP BY ORDER BY时COUNT需要自行计算
+$sql = "SELECT COUNT(DISTINCT(company_num)) AS total FROM invoice WHERE 1=1 " . $where_string . " LIMIT 1";
+$count = db_query($sql, $query);
+db_pager_count($count[0]['total']);
+$where['ORDER'] = ['amount' => 'DESC'];
+$where['GROUP'] = 'company_num';
+$data = $this->invoice->pager($select, $where);
+~~~
+
 ## License
 
 [Apache License 2.0](LICENSE)
