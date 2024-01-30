@@ -217,6 +217,11 @@ class model
     */
     public function pager($join, $columns = null, $where = null, $ignore_hook = false)
     {
+        if($join['select']) {
+            $columns = $join;
+            unset($columns['select']);
+            $join = $join['select'];
+        }
         $this->_where($where);
         $all =  db_pager($this->table, $join, $columns, $where);
         if($all['data']) {
