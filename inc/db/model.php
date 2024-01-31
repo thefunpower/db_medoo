@@ -244,6 +244,9 @@ class model
             $this->before_update($data, $where);
         }
         $data_db = db_allow($this->table, $data);
+        if(!$data_db) {
+            return false;
+        }
         $row_count = db_update($this->table, $data_db, $where);
         if(!$ignore_hook) {
             $this->after_update($row_count, $data, $where);
@@ -266,6 +269,9 @@ class model
             $this->before_insert($data);
         }
         $data_db = db_allow($this->table, $data);
+        if(!$data_db) {
+            return false;
+        }
         $id = db_insert($this->table, $data_db);
         if(!$ignore_hook) {
             $this->after_insert($id);
@@ -289,7 +295,10 @@ class model
             if(!$ignore_hook) {
                 $this->before_insert($v);
             }
-            $new_data[] = db_allow($this->table, $v);
+            $allow_data = db_allow($this->table, $v);
+            if($allow_data) {
+                $new_data[] = $allow_data;
+            }
         }
         if(!$new_data) {
             return false;
@@ -397,6 +406,9 @@ class model
         $this->_where($where);
         if(!$ignore_hook) {
             $this->before_del($where);
+        }
+        if(!$where) {
+            return false;
         }
         $res = db_del($this->table, $where);
         if(!$ignore_hook) {
