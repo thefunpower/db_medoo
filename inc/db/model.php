@@ -545,7 +545,7 @@ class model
         if($is_frist) {
             $_data = [];
         }
-        $end = $this->find(['id' => $id], 1, false, true);
+        $end = $this->_find(['id' => $id], 1, false, true);
         $_data[] = $end;
         if($end['pid'] > 0) {
             $this->get_tree_up($end['pid'], false);
@@ -558,7 +558,7 @@ class model
     public function tree_del($id = '', $where = [])
     {
         if($where) {
-            $catalog = $this->find($where, '', false, true);
+            $catalog = $this->_find($where, '', false, true);
         }
         $all = array_to_tree($catalog, $pk = 'id', $pid = 'pid', $child = 'children', $id);
         if($id) {
@@ -582,9 +582,9 @@ class model
     */
     public function get_tree_id($id, $where = [], $get_field = 'id')
     {
-        $list = $this->find($where, '', false, true);
+        $list = $this->_find($where, '', false, true);
         $tree = array_to_tree($list, $pk = 'id', $pid = 'pid', $child = 'children', $id);
-        $tree[] = $this->find(['id' => $id], 1, false, true);
+        $tree[] = $this->_find(['id' => $id], 1, false, true);
         $all = $this->_loop_tree_deep_inner($tree, $get_field, $is_frist = true);
         return $all;
     }
