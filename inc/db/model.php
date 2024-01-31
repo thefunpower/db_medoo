@@ -441,6 +441,13 @@ class model
         return $this->find($where, '', false, $ignore_hook);
     }
     /**
+    * 忽略HOOK 删除数据
+    */
+    public function f_find($where = '', $limit = '', $use_select = false)
+    {
+        return $this->find($where, $limit, $use_select, true);
+    }
+    /**
     * 查寻记录
     */
     public function find($where = '', $limit = '', $use_select = false, $ignore_hook = false)
