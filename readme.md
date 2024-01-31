@@ -548,18 +548,31 @@ class invoice_detail extends \core\sys\model\base
 {
     protected $table = 'invoice_detail';
     protected $has_one = [
-        'detail_one' => [invoice::class,'invoice_id'] 
-    ]; 
+        'detail_one' => [invoice::class,'invoice_id'],
+    ];
+    protected $has_many = [
+        'product_info' => [invoice_product::class,'product_num','product_num',['LIMIT' => 2]]
+    ];
 
-} 
+    public function after_find(&$data)
+    {
+        unset($data['id']);
+    }
+}
+
 class invoice extends \core\sys\model\base
 {
     protected $table = 'invoice';
-
     protected $has_many = [
-        'detail' => [invoice_detail::class,'invoice_id','id',['LIMIT' => 2]] 
-    ];  
+        'detail' => [invoice_detail::class,'invoice_id','id',['LIMIT' => 2]]
+    ];
 }
+
+class invoice_product extends \core\sys\model\base
+{
+    protected $table = 'invoice_products';
+}
+
 ~~~
 
 默认并不会自动查寻关联数据，如果查寻关联数据
