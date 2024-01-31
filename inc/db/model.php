@@ -119,6 +119,7 @@ class model
                 }
             }
         }
+        $this->ignore_relation = true;
     }
     /**
     * 查寻后
