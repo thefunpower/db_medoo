@@ -13,6 +13,7 @@ class model
     protected $ignore_after_find_hook;
     protected $has_one;
     protected $has_many;
+    public $ignore_relation = false;
     public static $init;
     /**
     * 字段映射 名字=>数据库中字段名
@@ -75,33 +76,35 @@ class model
                 }
             }
         }
-        $has_many = $this->has_many;
-        if($has_many) {
-            foreach($has_many as $k => $v) {
-                $cls = "\\" . $v[0];
-                $key = $v[1];
-                $pk = $v[2] ?: 'id';
-                $option = $v[3] ?: [];
-                $val = $data[$pk];
-                if($key && $key  && $val) {
-                    $where = $option;
-                    $where[$key] = $val;
-                    $data[$k] = $cls::model()->find($where);
+        if(!$this->ignore_relation) {
+            $has_many = $this->has_many;
+            if($has_many) {
+                foreach($has_many as $k => $v) {
+                    $cls = "\\" . $v[0];
+                    $key = $v[1];
+                    $pk = $v[2] ?: 'id';
+                    $option = $v[3] ?: [];
+                    $val = $data[$pk];
+                    if($key && $key  && $val) {
+                        $where = $option;
+                        $where[$key] = $val;
+                        $data[$k] = $cls::model()->find($where);
+                    }
                 }
             }
-        }
-        $has_one = $this->has_one;
-        if($has_one) {
-            foreach($has_one as $k => $v) {
-                $cls = "\\" . $v[0];
-                $key = $v[1];
-                $pk = $v[2] ?: 'id';
-                $option = $v[3] ?: [];
-                $val = $data[$key];
-                if($key && $key  && $val) {
-                    $where = $option;
-                    $where[$pk] = $val;
-                    $data[$k] = $cls::model()->find($where, 1);
+            $has_one = $this->has_one;
+            if($has_one) {
+                foreach($has_one as $k => $v) {
+                    $cls = "\\" . $v[0];
+                    $key = $v[1];
+                    $pk = $v[2] ?: 'id';
+                    $option = $v[3] ?: [];
+                    $val = $data[$key];
+                    if($key && $key  && $val) {
+                        $where = $option;
+                        $where[$pk] = $val;
+                        $data[$k] = $cls::model()->find($where, 1);
+                    }
                 }
             }
         }

@@ -562,6 +562,12 @@ class invoice extends \core\sys\model\base
 }
 ~~~
 
+默认会自动查寻关联数据，如果不需要查寻关联可用
+~~~
+$m = new yourmodelname();
+$m->ignore_relation = true;
+~~~
+
 insert
 
 ~~~
