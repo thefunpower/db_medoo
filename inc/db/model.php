@@ -295,6 +295,8 @@ class model
         $all =  db_pager($this->table, $join, $columns, $where);
         if($all['data']) {
             foreach($all['data'] as &$v) {
+                $this->do_relation($v);
+                $this->after_find_inner($v);
                 if(!$ignore_hook) {
                     $this->after_find($v);
                 }
