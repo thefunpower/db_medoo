@@ -73,6 +73,13 @@ class model
         return $this;
     }
     /**
+     * 仅用于分于
+     */
+    public function reset_relation()
+    {
+        $this->ignore_relation = true;
+    }
+    /**
      * 处理关联
      */
     public function do_relation(&$data)
@@ -119,7 +126,6 @@ class model
                 }
             }
         }
-        $this->ignore_relation = true;
     }
     /**
     * 查寻后
@@ -303,6 +309,7 @@ class model
                 }
             }
         }
+        $this->reset_relation();
         return $all;
     }
     /**
@@ -407,6 +414,15 @@ class model
     * 查寻记录
     */
     public function find($where = '', $limit = '', $use_select = false, $ignore_hook = false)
+    {
+        $data = $this->_find($where, $limit, $use_select, $ignore_hook);
+        $this->reset_relation();
+        return $data;
+    }
+    /**
+    * 查寻记录
+    */
+    public function _find($where = '', $limit = '', $use_select = false, $ignore_hook = false)
     {
         $select = "*";
         if($where && is_array($where)) {
