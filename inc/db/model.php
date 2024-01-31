@@ -14,7 +14,7 @@ class model
     protected $has_one;
     protected $has_many;
     public $ignore_relation = true;
-    public static $_relation;
+    public $_relation_with = [];
     public static $init;
     /**
     * 字段映射 名字=>数据库中字段名
@@ -66,10 +66,10 @@ class model
     /**
      * 开启关联查寻
      */
-    public function relation()
+    public function relation($opt = [])
     {
         $this->ignore_relation = false;
-        static::$_relation = [];
+        $this->_relation_with = $opt;
         return $this;
     }
     /**
@@ -77,11 +77,7 @@ class model
      */
     public function do_relation(&$data)
     {
-        $class = "\\" . get_class($this);
-        if(static::$_relation[$class]) {
-            return;
-        }
-        static::$_relation[$class] = true;
+        $_relation_with = $this->_relation_with;
         if(!$this->ignore_relation) {
             $has_many = $this->has_many;
             if($has_many) {
@@ -94,8 +90,12 @@ class model
                     if($key && $key  && $val) {
                         $where = $option;
                         $where[$key] = $val;
-                        $data[$k] = $cls::model()->find($where);
-                        static::$_relation[$cls] = true;
+                        if($_relation_with && in_array($k, $_relation_with)) {
+                            unset($_relation_with[array_search($k, $_relation_with)]);
+                            $data[$k] = $cls::model()->relation($_relation_with)->find($where);
+                        } else {
+                            $data[$k] = $cls::model()->find($where);
+                        }
                     }
                 }
             }
@@ -110,8 +110,11 @@ class model
                     if($key && $key  && $val) {
                         $where = $option;
                         $where[$pk] = $val;
-                        $data[$k] = $cls::model()->find($where, 1);
-                        static::$_relation[$cls] = true;
+                        if($_relation_with && in_array($k, $_relation_with)) {
+                            $data[$k] = $cls::model()->relation($_relation_with)->find($where, 1);
+                        } else {
+                            $data[$k] = $cls::model()->find($where, 1);
+                        }
                     }
                 }
             }
@@ -449,11 +452,13 @@ class model
             } else {
                 $res = db_get_one($this->table, $select, $where);
             }
-            $this->do_relation($res);
-            $this->after_find_inner($res);
-            if(!$ignore_hook) {
-                if(is_array($res) && !$this->ignore_after_find_hook[$this->table . $res['id']]) {
-                    $this->after_find($res);
+            if(is_array($res)) {
+                $this->do_relation($res);
+                $this->after_find_inner($res);
+                if(!$ignore_hook) {
+                    if(is_array($res) && !$this->ignore_after_find_hook[$this->table . $res['id']]) {
+                        $this->after_find($res);
+                    }
                 }
             }
         } else {
@@ -462,13 +467,14 @@ class model
             } else {
                 $res = db_get($this->table, $select, $where);
             }
-            static::$_relation = [];
             foreach($res as &$v) {
-                $this->do_relation($v);
-                $this->after_find_inner($v);
-                if(!$ignore_hook) {
-                    if(is_array($v) && !$this->ignore_after_find_hook[$this->table . $v['id']]) {
-                        $this->after_find($v);
+                if(is_array($v)) {
+                    $this->do_relation($v);
+                    $this->after_find_inner($v);
+                    if(!$ignore_hook) {
+                        if(is_array($v) && !$this->ignore_after_find_hook[$this->table . $v['id']]) {
+                            $this->after_find($v);
+                        }
                     }
                 }
             }
