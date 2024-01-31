@@ -541,20 +541,41 @@ $model->find(['name'=>'t'],$limit=1)  //返回一条记录
 $model->find(['name'=>'t'])  //返回所有记录
 ~~~
 
+关联定义
+
+~~~
+class invoice_detail extends \core\sys\model\base
+{
+    protected $table = 'invoice_detail';
+    protected $has_one = [
+        'detail_one' => [invoice::class,'invoice_id'] 
+    ]; 
+
+} 
+class invoice extends \core\sys\model\base
+{
+    protected $table = 'invoice';
+
+    protected $has_many = [
+        'detail' => [invoice_detail::class,'invoice_id','id',['LIMIT' => 2]] 
+    ];  
+}
+~~~
+
 insert
 
 ~~~
-$model->insert($data)
+$model->insert($data, $ignore_hook = false)
 ~~~
 
 update
 ~~~
-$model->update($data,$where = '')
+$model->update($data,$where = '', $ignore_hook = false)
 ~~~
 
 pager
 ~~~
-$model->pager($join, $columns = null, $where = null)
+$model->pager($join, $columns = null, $where = null, $ignore_hook = false)
 ~~~
 
 sum
@@ -570,7 +591,7 @@ $model->count($where = '')
 
 delete
 ~~~
-$model->del($where = '')
+$model->del($where = '', $ignore_hook = false)
 ~~~
 
 max
