@@ -225,16 +225,11 @@ class model
     */
     public function after_del($where) {}
     /**
-     * 强制更新
+     * 忽略HOOK 更新
      */
     public function f_update($data, $where = '')
     {
-        $data_db = db_allow($this->table, $data);
-        if(!is_array($where)) {
-            $where = ['id' => $id];
-        }
-        return db_update($this->table, $data_db, $where);
-
+        return $this->update($data, $where, true);
     }
     /**
     * 更新数据
@@ -256,6 +251,13 @@ class model
         return $row_count;
     }
     /**
+    * 忽略HOOK 写入数据
+    */
+    public function f_insert($data)
+    {
+        return $this->insert($data, true);
+    }
+    /**
     * 写入数据
     */
     public function insert($data, $ignore_hook = false)
@@ -269,6 +271,13 @@ class model
             $this->after_insert($id);
         }
         return $id;
+    }
+    /**
+    * 忽略HOOK 批量写入数据
+    */
+    public function f_inserts($data)
+    {
+        return $this->inserts($data, true);
     }
     /**
     * 批量写入数据
@@ -287,6 +296,13 @@ class model
         }
         db()->insert($this->table, $new_data);
         return true;
+    }
+    /**
+    * 忽略HOOK 分页
+    */
+    public function f_pager($join, $columns = null, $where = null)
+    {
+        return $this->pager($join, $columns, $where, true);
     }
     /**
     * 分页
@@ -351,6 +367,20 @@ class model
     {
         $this->_where($where);
         return db_get_avg($this->table, $filed, $where);
+    }
+    /**
+    * 忽略HOOK 删除数据
+    */
+    public function f_delete($where)
+    {
+        return $this->del($where, true);
+    }
+    /**
+    * 忽略HOOK 删除数据
+    */
+    public function f_del($where)
+    {
+        return $this->del($where, true);
     }
     /**
     * 删除数据
