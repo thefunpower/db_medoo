@@ -13,9 +13,8 @@ class model
     protected $ignore_after_find_hook;
     protected $has_one;
     protected $has_many;
-    public $ignore_relation = false;
-    public static $relation_level_i = 0;
-    public $relation_level;
+    public $ignore_relation = true;
+    public static $_relation;
     public static $init;
     /**
     * 字段映射 名字=>数据库中字段名
@@ -65,10 +64,24 @@ class model
         return static::$init;
     }
     /**
+     * 开启关联查寻
+     */
+    public function relation()
+    {
+        $this->ignore_relation = false;
+        static::$_relation = [];
+        return $this;
+    }
+    /**
      * 处理关联
      */
     public function do_relation(&$data)
     {
+        $class = "\\" . get_class($this);
+        if(static::$_relation[$class]) {
+            return;
+        }
+        static::$_relation[$class] = true;
         if(!$this->ignore_relation) {
             $has_many = $this->has_many;
             if($has_many) {
@@ -82,6 +95,7 @@ class model
                         $where = $option;
                         $where[$key] = $val;
                         $data[$k] = $cls::model()->find($where);
+                        static::$_relation[$cls] = true;
                     }
                 }
             }
@@ -97,6 +111,7 @@ class model
                         $where = $option;
                         $where[$pk] = $val;
                         $data[$k] = $cls::model()->find($where, 1);
+                        static::$_relation[$cls] = true;
                     }
                 }
             }
@@ -447,10 +462,10 @@ class model
             } else {
                 $res = db_get($this->table, $select, $where);
             }
-            self::$relation_level_i++;
+            static::$_relation = [];
             foreach($res as &$v) {
-                $this->do_relation($res);
-                $this->after_find_inner($res);
+                $this->do_relation($v);
+                $this->after_find_inner($v);
                 if(!$ignore_hook) {
                     if(is_array($v) && !$this->ignore_after_find_hook[$this->table . $v['id']]) {
                         $this->after_find($v);
