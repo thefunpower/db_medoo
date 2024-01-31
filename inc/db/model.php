@@ -14,6 +14,8 @@ class model
     protected $has_one;
     protected $has_many;
     public $ignore_relation = false;
+    public static $relation_level_i = 0;
+    public $relation_level;
     public static $init;
     /**
     * 字段映射 名字=>数据库中字段名
@@ -63,19 +65,10 @@ class model
         return static::$init;
     }
     /**
-    * 查寻后
-    */
-    public function after_find_inner(&$data)
+     * 处理关联
+     */
+    public function do_relation(&$data)
     {
-        $ln = $this->field_ln;
-        if($ln) {
-            $data['_has_ln'] = true;
-            foreach($ln as $k => $v) {
-                if($data[$v]) {
-                    $data[$k] = $data[$v];
-                }
-            }
-        }
         if(!$this->ignore_relation) {
             $has_many = $this->has_many;
             if($has_many) {
@@ -105,6 +98,21 @@ class model
                         $where[$pk] = $val;
                         $data[$k] = $cls::model()->find($where, 1);
                     }
+                }
+            }
+        }
+    }
+    /**
+    * 查寻后
+    */
+    public function after_find_inner(&$data)
+    {
+        $ln = $this->field_ln;
+        if($ln) {
+            $data['_has_ln'] = true;
+            foreach($ln as $k => $v) {
+                if($data[$v]) {
+                    $data[$k] = $data[$v];
                 }
             }
         }
@@ -174,7 +182,6 @@ class model
                     if($res && $res[$this->primary] != $id) {
                         json_error(['msg' => $this->unique_message[$i] ?: '记录已存在','key' => $f1]);
                     }
-
                 }
             }
         }
@@ -427,6 +434,7 @@ class model
             } else {
                 $res = db_get_one($this->table, $select, $where);
             }
+            $this->do_relation($res);
             $this->after_find_inner($res);
             if(!$ignore_hook) {
                 if(is_array($res) && !$this->ignore_after_find_hook[$this->table . $res['id']]) {
@@ -439,7 +447,9 @@ class model
             } else {
                 $res = db_get($this->table, $select, $where);
             }
+            self::$relation_level_i++;
             foreach($res as &$v) {
+                $this->do_relation($res);
                 $this->after_find_inner($res);
                 if(!$ignore_hook) {
                     if(is_array($v) && !$this->ignore_after_find_hook[$this->table . $v['id']]) {
