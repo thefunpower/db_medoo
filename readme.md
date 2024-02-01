@@ -785,7 +785,9 @@ $count = db_query($sql, $query);
 db_pager_count($count[0]['total']);
 $where['ORDER'] = ['amount' => 'DESC'];
 $where['GROUP'] = 'company_num';
-$data = $this->invoice->pager($select, $where);
+$new_where = $where;
+$new_where['select'] = $select;
+$data = $this->invoice->pager($new_where);
 ~~~
 
 ## License
