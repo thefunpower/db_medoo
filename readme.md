@@ -1,8 +1,8 @@
 # 数据库操作
 
-对 `Medoo Version: 2.1.11` 再封装，让操作更简单。
+对 [Medoo](https://github.com/catfan/Medoo) `v2.1.11` 再封装，让操作更简单。
 
-[Medoo](https://github.com/catfan/Medoo)
+
 
 在原类`Medoo.php`上添加
 ~~~
