@@ -1,9 +1,21 @@
 # 数据库操作
 
-对 `Medoo Version: 2.1.10` 再封装，让操作更简单。
+对 `Medoo Version: 2.1.11` 再封装，让操作更简单。
+
+[Medoo](https://github.com/catfan/Medoo)
+
+在原类`Medoo.php`上添加
+~~~
+$where['FOR UPDATE'] => TRUE 
+$where['user_name[FIND_IN_SET]']=>(string)10 
+$where['user_name[RAW]'] => '[a-z0-9]*'
 
 ~~~
+
+安装 
+
 composer require thefunpower/db_medoo
+
 ~~~
 
 配置
