@@ -14,12 +14,12 @@ $where['user_name[RAW]'] => '[a-z0-9]*'
 
 安装 
 
+~~~
 composer require thefunpower/db_medoo
-
 ~~~
 
-配置
 
+配置
 ~~~
 /**
 * 数据库连接
