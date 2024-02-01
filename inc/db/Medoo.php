@@ -948,8 +948,8 @@ class Medoo
                             $item = '%' . $item . '%';
                         }
 
-                        $likeClauses[] = $column . ($operator === '!~' ? ' NOT' : '') . " LIKE {$mapKey}L{$index}$";
-                        $map["{$mapKey}L{$index}$"] = [$item, PDO::PARAM_STR];
+                        $likeClauses[] = $column . ($operator === '!~' ? ' NOT' : '') . " LIKE {$mapKey}L{$index}_";
+                        $map["{$mapKey}L{$index}_"] = [$item, PDO::PARAM_STR];
                     }
 
                     $stack[] = '(' . implode($connector, $likeClauses) . ')';
