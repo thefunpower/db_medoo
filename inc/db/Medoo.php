@@ -942,14 +942,15 @@ class Medoo
                     $likeClauses = [];
 
                     foreach ($value as $index => $item) {
+                        $likeKey = "{$mapKey}_{$index}_i";
                         $item = strval($item);
 
                         if (!preg_match('/((?<!\\\)\[.+(?<!\\\)\]|(?<!\\\)[\*\?\!\%#^_]|%.+|.+%)/', $item)) {
                             $item = '%' . $item . '%';
                         }
 
-                        $likeClauses[] = $column . ($operator === '!~' ? ' NOT' : '') . " LIKE {$mapKey}L{$index}_";
-                        $map["{$mapKey}L{$index}_"] = [$item, PDO::PARAM_STR];
+                        $likeClauses[] = $column . ($operator === '!~' ? ' NOT' : '') . " LIKE {$likeKey}";
+                        $map[$likeKey] = [$item, PDO::PARAM_STR];
                     }
 
                     $stack[] = '(' . implode($connector, $likeClauses) . ')';
@@ -974,9 +975,9 @@ class Medoo
                     $map[$mapKey] = [$value, PDO::PARAM_STR];
                 } elseif ($operator === 'FIND_IN_SET') {
                     $stack[] = "FIND_IN_SET ({$mapKey},{$column})";
-                    $map[$mapKey] = [(string)$value, PDO::PARAM_STR]; 
-                } elseif ($operator === 'RAW' && $this->isRaw($value)) { 
-                    $stack[] = $this->buildRaw($value, $map); 
+                    $map[$mapKey] = [(string)$value, PDO::PARAM_STR];
+                } elseif ($operator === 'RAW' && $this->isRaw($value)) {
+                    $stack[] = $this->buildRaw($value, $map);
                 } else {
                     throw new InvalidArgumentException("Invalid operator [{$operator}] for column {$column} supplied.");
                 }
@@ -1037,7 +1038,7 @@ class Medoo
     {
         $clause = '';
         $lock = '';
-        if(isset($where['FOR UPDATE'])){
+        if(isset($where['FOR UPDATE'])) {
             $lock = " FOR UPDATE";
             unset($where['FOR UPDATE']);
         }
