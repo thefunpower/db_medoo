@@ -594,7 +594,7 @@ class model
         if($is_frist) {
             $_data = [];
         }
-        $end = $this->f_find(['id' => $id]);
+        $end = $this->f_find(['id' => $id], 1);
         $_data[] = $end;
         if($end['pid'] > 0) {
             $this->get_tree_up($end['pid'], false);
