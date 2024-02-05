@@ -1,6 +1,6 @@
 # 数据库操作
 
-对 [Medoo](https://github.com/catfan/Medoo) `v2.1.11` 再封装，让操作更简单。
+对 [Medoo](https://github.com/catfan/Medoo) `v2.1.12` 再封装，让操作更简单。
 
 且独立维护`Medoo.php`，不再同步官方代码，如有BUG提交ISSUE
 
