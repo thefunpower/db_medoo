@@ -1213,35 +1213,20 @@ function db_between_month($field, $date1, $date2)
 */
 function xa_db_action($key_call = [])
 {
-    global $_db_connects;
-    global $_db_thor_err;
+    global $_db_connects,$_db_thor_err,$_db_error;
     $_db_thor_err = true;
-    $find_err = false;
     $commits = [];
-    $active_dsn = [];
-    $only = [];
-    foreach($key_call as $key => $call) {
-        $medoo = $_db_connects[$key];
-        $dsn = $medoo->info()['dsn'];
-        if(!$active_dsn[$dsn]) {
-            $active_dsn[$dsn] = $key;
-            $only[$key] = true;
-        }
-        $pdo = $medoo->pdo;
-        if(!is_object($pdo)) {
-            throw new Exception("未知的数据库" . $key);
-        }
-    }
     try {
         foreach($key_call as $key => $call) {
             $medoo = $_db_connects[$key];
             $dsn = $medoo->info()['dsn'];
-            $pdo = $medoo ->pdo;
-            if($only[$key]) {
-                $commits[] = $pdo;
-                $pdo->beginTransaction();
-                db_active($key);
+            $pdo = $medoo->pdo;
+            if(!is_object($pdo)) {
+                throw new Exception("未知的数据库" . $key);
             }
+            $commits[] = $pdo;
+            $pdo->beginTransaction();
+            db_active($key);
             $call();
         }
         foreach($commits as $pdo) {
@@ -1252,6 +1237,7 @@ function xa_db_action($key_call = [])
         foreach($commits as $pdo) {
             $pdo->rollBack();
         }
+        $_db_error[] = $e->getMessage();
         $_db_thor_err = false;
         $flag = false;
     }

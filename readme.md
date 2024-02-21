@@ -368,6 +368,11 @@ xa_db_action([
     //throw new Exception("错误");
   }
 ]);
+
+$err = db_get_error();
+if($err) {
+    pr($err);
+}
 ~~~
 
 其中 `a` `b`是数据库连接
