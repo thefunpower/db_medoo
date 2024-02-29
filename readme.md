@@ -644,13 +644,14 @@ $model->min($filed,$where = '')
 DISTINCT 
 
 ~~~
-//$res = $m->find(['@mobile','name'],$limit = '' ,true);
-$res = $m->find([
-    //"name2" => db_raw("COUNT(DISTINCT <title>)"),
-    '@title',
-    'phone',
+//$res = $m->find(['select'=>[@mobile','name']],$limit = '' ,true);
+$res = $m->find([ 
+    'select'=>['@title',"name2" => db_raw("COUNT(DISTINCT <title>)"),],
+    'status'=>1,
 ],$limit = '' ,true);
 ~~~
+
+`select`数组中的`@title`是`GROUP BY`
 
 ## 数据库结构比较
 
