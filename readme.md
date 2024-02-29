@@ -644,7 +644,6 @@ $model->min($filed,$where = '')
 DISTINCT 
 
 ~~~
-//$res = $m->find(['select'=>[@mobile','name']],$limit = '' ,true);
 $res = $m->find([ 
     'select'=>['@title',"name2" => db_raw("COUNT(DISTINCT <title>)"),],
     'status'=>1,
