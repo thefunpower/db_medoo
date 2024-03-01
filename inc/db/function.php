@@ -237,6 +237,13 @@ function db_pager($table, $join, $columns = null, $where = null)
     } else {
         $data  =  db_get($table, $join, $columns, $where);
     }
+    if($data) {
+        $i = ($current_page - 1) * $per_page;
+        $j = 1;
+        foreach($data as &$v) {
+            $v['index'] = ++$i;
+        }
+    }
     $_db_par['size'] = $per_page;
     $_db_par['count'] = $count;
     return [
