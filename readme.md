@@ -211,7 +211,7 @@ db_del($table, $where)
 ~~~
 do_action("db_insert.$table.before", $data);
 do_action("db_save.$table.before", $data);
-~~~
+~~~ 
 
 ### 写入记录后
 
@@ -220,6 +220,14 @@ do_action("db_save.$table.before", $data);
 ~~~
 do_action("db_insert.$table.after", $action_data);
 do_action("db_save.$table.after", $action_data);
+~~~
+
+数据格式
+
+~~~
+$action_data = []; 
+$action_data['id']    = $id;
+$action_data['data']  = $data;
 ~~~
 
 ### 更新记录前
@@ -235,6 +243,15 @@ do_action("db_save.$table.before", $data);
 ~~~
 do_action("db_update.$table.after", $action_data);
 do_action("db_save.$table.after", $action_data); 
+~~~
+
+数据格式
+
+~~~
+$action_data = [];
+$action_data['where'] = $where; 
+$action_data['id']    = $where['id'] ?: '';
+$action_data['data']  = $data;
 ~~~
 
 ~~~
