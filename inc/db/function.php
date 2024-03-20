@@ -736,7 +736,7 @@ function db_del($table, $where)
     do_action("db_table.$table", $table);
     //删除数据前
     if(db_can_run_action()) {
-        do_action("db_insert.$table.del", $where);
+        do_action("db_del.$table.before", $where);
     }
     if(!$where) {
         return;
@@ -745,7 +745,11 @@ function db_del($table, $where)
         return;
     }
     $data = medoo_db()->delete(get_db_table_name($table), $where);
-    return $data->rowCount();
+    $count = $data->rowCount();
+    if(db_can_run_action() && $count > 0) {
+        do_action("db_del.$table.after", $where);
+    }    
+    return $count;
 }
 
 function db_delete($table, $where)

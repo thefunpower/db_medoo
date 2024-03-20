@@ -261,7 +261,8 @@ do_action("db_get_one.$table", $v);
 ## 删除前
 
 ~~~
-do_action("db_insert.$table.del", $where);
+do_action("db_del.$table.before", $where);
+do_action("db_del.$table.after", $where);
 ~~~
 
 
