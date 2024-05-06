@@ -543,7 +543,7 @@ model事件，注意使用`parent::`
     /**
     * 删除后
     */
-    public function after_del($row_count,$where)
+    public function after_del($where)
     {        
     }
 ~~~
