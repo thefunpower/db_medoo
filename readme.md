@@ -813,6 +813,17 @@ $new_where['select'] = $select;
 $data = $this->invoice->pager($new_where);
 ~~~
 
+## GROUP BY 多字段导致total数量不对
+
+~~~
+$group_by = "product_num,base_name";
+$sql = "select count(id) as total from (select * from ".$table." GROUP BY ".$group_by.") as wms";
+$res  = db_query($sql,[]);
+$total = $res[0]['total']; 
+$all['total'] = $total;
+~~~
+
+
 ## License
 
 [Apache License 2.0](LICENSE)
