@@ -471,6 +471,26 @@ class model
     /**
     * 查寻记录
     */
+    public function find_cache($where = '', $limit = '', $use_select = false, $ignore_hook = false){
+        $uni = "";
+        if(is_array($where)){
+            $uni = md5(json_encode($where));
+        }else{
+            $uni = $where; 
+        }
+        $uni = md5($uni.$limit.'a'.$use_select.'b'.$ignore_hook);
+        $key = 'model:cache:'.$this->table.":".$uni;
+        $res = self::$_cache_find[$key];
+        if($res){
+            return $res;
+        }
+        $res = $this->find($where, $limit, $use_select, $ignore_hook);
+        self::$_cache_find[$key] = $res; 
+        return $res;
+    }
+    /**
+    * 查寻记录
+    */
     public function _find($where = '', $limit = '', $use_select = false, $ignore_hook = false)
     {
         $select = "*";
