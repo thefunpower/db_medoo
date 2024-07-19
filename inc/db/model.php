@@ -16,6 +16,7 @@ class model
     public $ignore_relation = true;
     public $_relation_with = [];
     public static $init;
+    public static $_cache_find; 
     /**
     * 字段映射 名字=>数据库中字段名
     * 仅支持find方法
